@@ -184,10 +184,10 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 			strcpy(newNode->name, name);
 			newNode->next = NULL;
+			printf("Value of curType: %i", curType);
 
 			try {
 				switch(curType) {
-
 					// case INT_CAMERA:
 					// case INT_STEREO:
 					// 	if(strstr(newNode->name, "stereo")){
@@ -199,6 +199,9 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 					case INT_IMU:
 						newNode->interface = new IMUInterface(nh, newNode->name);
+						tail->next = newNode;
+						tail = newNode;
+						newNode->interface->AdvertiseTopics();
 						break;
 
 					// case INT_VIO:
@@ -211,13 +214,13 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 					default: //Should never get here
 						printf("Reached impossible line of code: %s %d\n", __FUNCTION__, __LINE__);
-						exit(-1);
+						//exit(-1);
 
 				}
 
-				tail->next = newNode;
-				tail = newNode;
-				newNode->interface->AdvertiseTopics();
+				//tail->next = newNode;
+				//tail = newNode;
+				//newNode->interface->AdvertiseTopics();
 
 			} catch (int i){
 

@@ -67,8 +67,6 @@ set(dependencies
   rosidl_default_generators
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -pthread -Wall -fpermissive")
-
 add_executable(${PROJECT_NAME}_node
     src/interfaces/imu_interface.cpp
     src/utils/common_utils.cpp
@@ -77,8 +75,8 @@ add_executable(${PROJECT_NAME}_node
 )
 ament_target_dependencies(${PROJECT_NAME}_node ${dependencies})
 target_link_libraries(${PROJECT_NAME}_node
-   modal_pipe
-   modal_json
+	/usr/lib64/libmodal_pipe.so
+	/usr/lib64/libmodal_json.so
 )
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
