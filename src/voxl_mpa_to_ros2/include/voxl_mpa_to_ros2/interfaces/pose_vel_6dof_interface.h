@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2021 ModalAI Inc.
+ * Copyright 2020 ModalAI Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,27 +31,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#ifndef ALL_MPA_INTERFACES
-#define ALL_MPA_INTERFACES
+#ifndef POSE_VEL_6DOF_MPA_INTERFACE
+#define POSE_VEL_6DOF_MPA_INTERFACE
+
+
+#include "voxl_msgs/msg/poseveldof.hpp"
 
 #include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
-// #include "camera_interface.h"
-// #include "stereo_interface.h"
-#include "voxl_mpa_to_ros2/interfaces/imu_interface.h"
-#include "voxl_mpa_to_ros2/interfaces/pose_vel_6dof_interface.h"
 
-// #include "vio_interface.h"
-// #include "point_cloud_interface.h"
 
-enum InterfaceType {
-    INT_NOT_SUPPORTED=-2,
-    INT_NONE=-1,
-    INT_CAMERA,
-    INT_STEREO,
-    INT_IMU,
-    INT_VIO,
-    INT_PC,
-    INT_6DOF
+class PoseVel6DOFInterface: public GenericInterface
+{
+public:
+    PoseVel6DOFInterface(rclcpp::Node::SharedPtr nh,
+                 const char*     name);
+
+    ~PoseVel6DOFInterface() { };
+
+    int  GetNumClients();
+    void AdvertiseTopics();
+    void StopAdvertising();
+
+    voxl_msgs::msg::Poseveldof& GetPoseVel6DOFMsg(){
+        return m_poseVel6DOFMsg;
+    }
+
+    rclcpp::Publisher<voxl_msgs::msg::Poseveldof>::SharedPtr pose_vel_6dof_pub_;
+
+private:
+
+    voxl_msgs::msg::Poseveldof               m_poseVel6DOFMsg;                ///< 6DOF msg
 };
-
 #endif

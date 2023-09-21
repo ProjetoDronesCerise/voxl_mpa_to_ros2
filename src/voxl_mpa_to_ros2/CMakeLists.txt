@@ -56,6 +56,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(px4_ros_com REQUIRED)
+find_package(voxl_msgs REQUIRED)
 
 include_directories(include) 
 
@@ -65,10 +66,12 @@ set(dependencies
   Eigen3
   px4_ros_com
   rosidl_default_generators
+  voxl_msgs
 )
 
 add_executable(${PROJECT_NAME}_node
     src/interfaces/imu_interface.cpp
+    src/interfaces/pose_vel_6dof_interface.cpp
     src/utils/common_utils.cpp
     src/interface_manager.cpp
     src/mpa_ros_node.cpp

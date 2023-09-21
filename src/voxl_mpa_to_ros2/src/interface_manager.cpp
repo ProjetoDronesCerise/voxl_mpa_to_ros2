@@ -137,10 +137,8 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 			}
 
 			if(!strncmp(buf, "imu_data_t", strlen("imu_data_t"))){
-				printf("Processing Type: %s\n", buf);
 				curType = INT_IMU;
 			} else if(!strncmp(buf, "pose_vel_6dof_t", strlen("pose_vel_6dof_t"))){
-				printf("Processing Type: %s\n", buf);
 				curType = INT_6DOF;
 			} else {
 				curType = INT_NOT_SUPPORTED;
@@ -187,8 +185,8 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 						break;	
 
 					case INT_6DOF:
-					 	newNode->interface = new 6DOFInterface(nh, newNode->name);
-					 	break;
+					 	newNode->interface = new PoseVel6DOFInterface(nh, newNode->name);
+						break;
 
 					default: //Should never get here
 						break;
