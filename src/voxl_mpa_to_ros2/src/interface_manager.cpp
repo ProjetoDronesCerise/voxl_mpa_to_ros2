@@ -136,18 +136,12 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 				return -1;
 			}
 
-			//if(!strncmp(buf, "camera_image_metadata_t", strlen("camera_image_metadata_t"))){
-				//printf("Processing Type: %s\n", buf);
-				//curType = INT_CAMERA;
 			if(!strncmp(buf, "imu_data_t", strlen("imu_data_t"))){
-				//printf("Processing Type: %s\n", buf);
+				printf("Processing Type: %s\n", buf);
 				curType = INT_IMU;
-			//} else if(!strncmp(buf, "vio_data_t", strlen("vio_data_t"))){
-				//printf("Processing Type: %s\n", buf);
-				//curType = INT_VIO;
-			//} else if(!strncmp(buf, "point_cloud_metadata_t", strlen("point_cloud_metadata_t"))){
-				//printf("Processing Type: %s\n", buf);
-				//curType = INT_PC;
+			} else if(!strncmp(buf, "pose_vel_6dof_t", strlen("pose_vel_6dof_t"))){
+				printf("Processing Type: %s\n", buf);
+				curType = INT_6DOF;
 			} else {
 				curType = INT_NOT_SUPPORTED;
 			} 
@@ -188,30 +182,16 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 			try {
 				switch(curType) {
-					// case INT_CAMERA:
-					// case INT_STEREO:
-					// 	if(strstr(newNode->name, "stereo")){
-					// 		newNode->interface = new StereoInterface(nh, newNode->name);
-					// 	} else {
-					// 		newNode->interface = new CameraInterface(nh, newNode->name);
-					// 	}
-					// 	break;
-
 					case INT_IMU:
 						newNode->interface = new IMUInterface(nh, newNode->name);
 						break;	
-					// case INT_VIO:
-					// 	newNode->interface = new VIOInterface(nh, newNode->name);
-					// 	break;
 
-					// case INT_PC:
-					// 	newNode->interface = new PointCloudInterface(nh, newNode->name);
-					// 	break;
+					case INT_6DOF:
+					 	newNode->interface = new 6DOFInterface(nh, newNode->name);
+					 	break;
 
 					default: //Should never get here
 						break;
-						//printf("Reached impossible line of code: %s %d\n", __FUNCTION__, __LINE__);
-						//exit(-1);
 
 				}
 				
@@ -231,7 +211,6 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 	}
 
-	//fprintf(stderr, "done reading, closing pipe\n");
 	pclose(fp);
 
 	return 0;

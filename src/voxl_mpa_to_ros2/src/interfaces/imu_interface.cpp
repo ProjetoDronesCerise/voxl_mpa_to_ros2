@@ -55,22 +55,6 @@ IMUInterface::IMUInterface(
         nh->get_parameter("imu_frame",imu_frame);
     }
 
-    // TODO, make this an option
-    // if (!nh->has_parameter("rotate_to_enu")) {
-    //     rotate_to_enu_ = nh->declare_parameter("rotate_to_enu", true);
-    // } else {
-    //     nh->get_parameter("rotate_to_enu",rotate_to_enu_);
-    // }
-
-    m_imuMsg.header.frame_id = imu_frame;
-    m_imuMsg.orientation.x = 0;
-    m_imuMsg.orientation.y = 0;
-    m_imuMsg.orientation.z = 0;
-    m_imuMsg.orientation.w = 0;
-    m_imuMsg.orientation_covariance         = {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0};
-    m_imuMsg.angular_velocity_covariance    = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-    m_imuMsg.linear_acceleration_covariance = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-
     pipe_client_set_simple_helper_cb(m_channel, _helper_cb, this);
 
     if(pipe_client_open(m_channel, name, PIPE_CLIENT_NAME,
@@ -127,9 +111,6 @@ static void _helper_cb(__attribute__((unused))int ch, char* data, int bytes, voi
     for(int i=0;i<n_packets;i++){
 
         Eigen::Vector3d gyro, accel;
-        // TODO: Make this optional
-        // if (rotate_to_enu_)
-        // {
 
             // rotate to ENU
             auto gyro_frd = Eigen::Vector3d(
@@ -143,22 +124,9 @@ static void _helper_cb(__attribute__((unused))int ch, char* data, int bytes, voi
                 data_array[i].accl_ms2[1], 
                 data_array[i].accl_ms2[2]);
             accel = px4_ros_com::frame_transforms::aircraft_to_baselink_body_frame(accel_frd);
-        // }
-        // else
-        // {
-        //     gyro = Eigen::Vector3d(
-        //         data_array[i].gyro_rad[0], 
-        //         data_array[i].gyro_rad[1], 
-        //         data_array[i].gyro_rad[2]);
-        //     accel = Eigen::Vector3d(
-        //         data_array[i].accl_ms2[0], 
-        //         data_array[i].accl_ms2[1], 
-        //         data_array[i].accl_ms2[2]);
-        // }
 
         imu.header.stamp = _clock_monotonic_to_ros_time(
             interface->getNodeHandle(),data_array[i].timestamp_ns);
-        // imu.header.stamp = interface->getNodeHandle()->now();
         imu.angular_velocity.x = gyro[0];
         imu.angular_velocity.y = gyro[1];
         imu.angular_velocity.z = gyro[2];

@@ -48,7 +48,8 @@ enum InterfaceType {
     INT_STEREO,
     INT_IMU,
     INT_VIO,
-    INT_PC
+    INT_PC,
+    INT_6DOF
 };
 
 #endif
