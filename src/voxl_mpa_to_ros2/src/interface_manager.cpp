@@ -118,8 +118,8 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 	InterfaceType curType = INT_NONE;
 	char buf[64];
+
 	while(fgets(buf, 64, fp) != NULL){
-		//printf("%s", buf);
 
 		//Empty line, about to recieve new type
 		if(strlen(buf) == 1){
@@ -136,18 +136,18 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 				return -1;
 			}
 
-			if(!strncmp(buf, "camera_image_metadata_t", strlen("camera_image_metadata_t"))){
+			//if(!strncmp(buf, "camera_image_metadata_t", strlen("camera_image_metadata_t"))){
 				//printf("Processing Type: %s\n", buf);
-				curType = INT_CAMERA;
-			} else if(!strncmp(buf, "imu_data_t", strlen("imu_data_t"))){
+				//curType = INT_CAMERA;
+			if(!strncmp(buf, "imu_data_t", strlen("imu_data_t"))){
 				//printf("Processing Type: %s\n", buf);
 				curType = INT_IMU;
-			} else if(!strncmp(buf, "vio_data_t", strlen("vio_data_t"))){
+			//} else if(!strncmp(buf, "vio_data_t", strlen("vio_data_t"))){
 				//printf("Processing Type: %s\n", buf);
-				curType = INT_VIO;
-			} else if(!strncmp(buf, "point_cloud_metadata_t", strlen("point_cloud_metadata_t"))){
+				//curType = INT_VIO;
+			//} else if(!strncmp(buf, "point_cloud_metadata_t", strlen("point_cloud_metadata_t"))){
 				//printf("Processing Type: %s\n", buf);
-				curType = INT_PC;
+				//curType = INT_PC;
 			} else {
 				curType = INT_NOT_SUPPORTED;
 			} 
@@ -184,7 +184,7 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 			strcpy(newNode->name, name);
 			newNode->next = NULL;
-			printf("Value of curType: %i", curType);
+
 
 			try {
 				switch(curType) {
@@ -199,11 +199,7 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 					case INT_IMU:
 						newNode->interface = new IMUInterface(nh, newNode->name);
-						tail->next = newNode;
-						tail = newNode;
-						newNode->interface->AdvertiseTopics();
-						break;
-
+						break;	
 					// case INT_VIO:
 					// 	newNode->interface = new VIOInterface(nh, newNode->name);
 					// 	break;
@@ -213,14 +209,15 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 					// 	break;
 
 					default: //Should never get here
-						printf("Reached impossible line of code: %s %d\n", __FUNCTION__, __LINE__);
+						break;
+						//printf("Reached impossible line of code: %s %d\n", __FUNCTION__, __LINE__);
 						//exit(-1);
 
 				}
-
-				//tail->next = newNode;
-				//tail = newNode;
-				//newNode->interface->AdvertiseTopics();
+				
+				tail->next = newNode;
+				tail = newNode;
+				newNode->interface->AdvertiseTopics();
 
 			} catch (int i){
 
@@ -325,3 +322,4 @@ static bool pipeExists(const char *pipeName){
     }
 
 }
+
