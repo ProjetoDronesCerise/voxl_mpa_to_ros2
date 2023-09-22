@@ -35,7 +35,10 @@
 #define POSE_VEL_6DOF_MPA_INTERFACE
 
 
-#include "voxl_msgs/msg/poseveldof.hpp"
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 
 #include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
 
@@ -52,14 +55,20 @@ public:
     void AdvertiseTopics();
     void StopAdvertising();
 
-    voxl_msgs::msg::Poseveldof& GetPoseVel6DOFMsg(){
-        return m_poseVel6DOFMsg;
+    geometry_msgs::msg::PoseStamped& GetPoseMsg(){
+        return m_poseMsg;
+    }
+    nav_msgs::msg::Odometry& GetOdomMsg(){
+        return m_odomMsg;
     }
 
-    rclcpp::Publisher<voxl_msgs::msg::Poseveldof>::SharedPtr pose_vel_6dof_pub_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
 
 private:
 
-    voxl_msgs::msg::Poseveldof               m_poseVel6DOFMsg;                ///< 6DOF msg
+    geometry_msgs::msg::PoseStamped           m_poseMsg;                    ///< Image message
+    nav_msgs::msg::Odometry                   m_odomMsg;                    ///< Image message
+
 };
 #endif

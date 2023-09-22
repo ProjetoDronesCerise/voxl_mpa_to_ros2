@@ -56,7 +56,10 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(px4_ros_com REQUIRED)
-find_package(voxl_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(include) 
 
@@ -66,7 +69,11 @@ set(dependencies
   Eigen3
   px4_ros_com
   rosidl_default_generators
-  voxl_msgs
+  geometry_msgs
+  sensor_msgs
+  nav_msgs
+  tf2
+  tf2_ros
 )
 
 add_executable(${PROJECT_NAME}_node

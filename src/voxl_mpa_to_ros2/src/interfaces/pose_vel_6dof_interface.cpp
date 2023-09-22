@@ -65,7 +65,10 @@ void PoseVel6DOFInterface::AdvertiseTopics(){
     char topicName[64];
 
     sprintf(topicName, "%s", m_pipeName);
-    pose_vel_6dof_pub_ = m_rosNodeHandle->create_publisher<voxl_msgs::msg::Poseveldof>
+    pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
+        (topicName, rclcpp::SensorDataQoS());
+
+    odom_pub_ = m_rosNodeHandle->create_publisher<nav_msgs::msg::Odometry>
         (topicName, rclcpp::SensorDataQoS());
 
     m_state = ST_AD;
@@ -74,14 +77,15 @@ void PoseVel6DOFInterface::AdvertiseTopics(){
 
 void PoseVel6DOFInterface::StopAdvertising(){
 
-    pose_vel_6dof_pub_.reset();
+    pose_pub_.reset();
+    odom_pub_.reset();
 
     m_state = ST_CLEAN;
 
 }
 
 int PoseVel6DOFInterface::GetNumClients(){
-    return pose_vel_6dof_pub_->get_subscription_count();
+    return pose_pub_->get_subscription_count() + odom_pub_->get_subscription_count();
 }
 
 // called when the simple helper has data for us
@@ -102,33 +106,48 @@ static void _helper_cb(__attribute__((unused))int ch, char* data, int bytes, voi
 
     PoseVel6DOFInterface *interface = (PoseVel6DOFInterface *) context;
     if(interface->GetState() != ST_RUNNING) return;
-    voxl_msgs::msg::Poseveldof& poseveldof = interface->GetPoseVel6DOFMsg();
+    
+    geometry_msgs::msg::PoseStamped& poseMsg = interface->GetPoseMsg();
+    nav_msgs::msg::Odometry& odomMsg = interface->GetOdomMsg();
 
     for(int i=0;i<n_packets;i++){
-        poseveldof.timestamp_ns = pose_array[i].timestamp_ns;
-        poseveldof.t_child_wrt_parent[0] = pose_array[i].T_child_wrt_parent[0];
-        poseveldof.t_child_wrt_parent[1] = pose_array[i].T_child_wrt_parent[1];
-        poseveldof.t_child_wrt_parent[2] = pose_array[i].T_child_wrt_parent[2];
+        pose_vel_6dof_t data = pose_array[i];
 
-        poseveldof.r_child_to_parent[0] = pose_array[i].R_child_to_parent[0][0];
-        poseveldof.r_child_to_parent[1] = pose_array[i].R_child_to_parent[0][1];
-        poseveldof.r_child_to_parent[2] = pose_array[i].R_child_to_parent[0][2];
-        poseveldof.r_child_to_parent[3] = pose_array[i].R_child_to_parent[1][0];
-        poseveldof.r_child_to_parent[4] = pose_array[i].R_child_to_parent[1][1];
-        poseveldof.r_child_to_parent[5] = pose_array[i].R_child_to_parent[1][2];
-        poseveldof.r_child_to_parent[6] = pose_array[i].R_child_to_parent[2][0];
-        poseveldof.r_child_to_parent[7] = pose_array[i].R_child_to_parent[2][1];
-        poseveldof.r_child_to_parent[8] = pose_array[i].R_child_to_parent[2][2];
+        //poseMsg.header.stamp = (_clock_monotonic_to_ros_time(data.timestamp_ns));
+        //odomMsg.header.stamp = (_clock_monotonic_to_ros_time(data.timestamp_ns));
 
-        poseveldof.v_child_wrt_parent[0] = pose_array[i].v_child_wrt_parent[0];
-        poseveldof.v_child_wrt_parent[1] = pose_array[i].v_child_wrt_parent[1];
-        poseveldof.v_child_wrt_parent[2] = pose_array[i].v_child_wrt_parent[2];
+        // extract quaternion from {imu w.r.t vio} rotation matrix
+        tf2::Matrix3x3 R(
+            data.R_child_to_parent[0][0],
+            data.R_child_to_parent[0][1],
+            data.R_child_to_parent[0][2],
+            data.R_child_to_parent[1][0],
+            data.R_child_to_parent[1][1],
+            data.R_child_to_parent[1][2],
+            data.R_child_to_parent[2][0],
+            data.R_child_to_parent[2][1],
+            data.R_child_to_parent[2][2]);
+        tf2::Quaternion q;
+        R.getRotation(q);
 
-        poseveldof.w_child_wrt_child[0] = pose_array[i].w_child_wrt_child[0];
-        poseveldof.w_child_wrt_child[1] = pose_array[i].w_child_wrt_child[1];
-        poseveldof.w_child_wrt_child[2] = pose_array[i].w_child_wrt_child[2];
+        poseMsg.pose.position.x = data.T_child_wrt_parent[0];
+        poseMsg.pose.position.y = data.T_child_wrt_parent[1];
+        poseMsg.pose.position.z = data.T_child_wrt_parent[2];
+        poseMsg.pose.orientation.x = q.getX();
+        poseMsg.pose.orientation.y = q.getY();
+        poseMsg.pose.orientation.z = q.getZ();
+        poseMsg.pose.orientation.w = q.getW();
+        interface->pose_pub_->publish(poseMsg);
 
-        interface->pose_vel_6dof_pub_->publish(poseveldof);
+        odomMsg.pose.pose = poseMsg.pose;
+        odomMsg.twist.twist.linear.x = data.v_child_wrt_parent[0];
+        odomMsg.twist.twist.linear.y = data.v_child_wrt_parent[1];
+        odomMsg.twist.twist.linear.z = data.v_child_wrt_parent[2];
+        odomMsg.twist.twist.angular.x = data.w_child_wrt_child[0];
+        odomMsg.twist.twist.angular.y = data.w_child_wrt_child[1];
+        odomMsg.twist.twist.angular.z = data.w_child_wrt_child[2];
+
+        interface->odom_pub_->publish(odomMsg);
     }
     return;
 }
