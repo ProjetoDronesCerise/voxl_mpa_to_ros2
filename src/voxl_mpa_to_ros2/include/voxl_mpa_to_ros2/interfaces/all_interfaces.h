@@ -38,6 +38,8 @@
 // #include "camera_interface.h"
 // #include "stereo_interface.h"
 #include "voxl_mpa_to_ros2/interfaces/imu_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/pose_vel_6dof_interface.h"
+
 // #include "vio_interface.h"
 // #include "point_cloud_interface.h"
 

@@ -1,5 +1,3 @@
-<?xml version="1.0"?>
-<!--
 /*******************************************************************************
  * Copyright 2020 ModalAI Inc.
  *
@@ -32,30 +30,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
--->
-<package format="3">
-  <name>voxl_mpa_to_ros2</name>
-  <version>0.0.4</version>
-  <description>The MPA to Ros2 package</description>
-  <maintainer email="stephen.m.nogar.civ@army.mil">Steve Nogar</maintainer>
-  <license>BSD</license>
-  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <!-- <depend>camera_info_manager</depend> -->
-  <!-- <depend>image_transport</depend> -->
-  <depend>sensor_msgs</depend>
-  <!-- <depend>geometry_msgs</depend> -->
-  <depend>eigen3_cmake_module</depend>
-  <depend>px4_ros_com</depend>
-  <depend>geometry_msgs</depend>
+#ifndef POSE_VEL_6DOF_MPA_INTERFACE
+#define POSE_VEL_6DOF_MPA_INTERFACE
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
-</package>
+#include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
+
+
+class PoseVel6DOFInterface: public GenericInterface
+{
+public:
+    PoseVel6DOFInterface(rclcpp::Node::SharedPtr nh,
+                 const char*     name);
+
+    ~PoseVel6DOFInterface() { };
+
+    int  GetNumClients();
+    void AdvertiseTopics();
+    void StopAdvertising();
+
+    geometry_msgs::msg::PoseStamped& GetPoseMsg(){
+        return m_poseMsg;
+    }
+    nav_msgs::msg::Odometry& GetOdomMsg(){
+        return m_odomMsg;
+    }
+
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+
+private:
+
+    geometry_msgs::msg::PoseStamped           m_poseMsg;                    ///< Image message
+    nav_msgs::msg::Odometry                   m_odomMsg;                    ///< Image message
+
+};
+#endif

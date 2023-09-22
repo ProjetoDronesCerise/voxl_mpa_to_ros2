@@ -56,6 +56,10 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(px4_ros_com REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(include) 
 
@@ -65,10 +69,16 @@ set(dependencies
   Eigen3
   px4_ros_com
   rosidl_default_generators
+  geometry_msgs
+  sensor_msgs
+  nav_msgs
+  tf2
+  tf2_ros
 )
 
 add_executable(${PROJECT_NAME}_node
     src/interfaces/imu_interface.cpp
+    src/interfaces/pose_vel_6dof_interface.cpp
     src/utils/common_utils.cpp
     src/interface_manager.cpp
     src/mpa_ros_node.cpp
