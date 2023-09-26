@@ -142,6 +142,8 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 				curType = INT_6DOF;
 			} else if(!strncmp(buf, "camera_image_metadata_t", strlen("camera_image_metadata_t"))){
 				curType = INT_CAMERA;
+			} else if(!strncmp(buf, "point_cloud_metadata_t", strlen("point_cloud_metadata_t"))){
+				curType = INT_PC;	
 			} else {
 				curType = INT_NOT_SUPPORTED;
 			} 
@@ -194,6 +196,10 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 						newNode->interface = new CameraInterface(nh, newNode->name);
 						break;
 						
+					case INT_PC:
+						newNode->interface = new PointCloudInterface(nh, newNode->name);
+						break;
+
 					default: //Should never get here
 						break;
 

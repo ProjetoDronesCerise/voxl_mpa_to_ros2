@@ -32,8 +32,9 @@
  ******************************************************************************/
 #include <modal_pipe.h>
 #include <modal_json.h>
-#include "point_cloud_interface.h"
-#include "camera_helpers.h"
+
+#include "voxl_mpa_to_ros2/interfaces/point_cloud_interface.h"
+#include "voxl_mpa_to_ros2/utils/camera_helpers.h"
 
 static void _helper_cb(
                            int ch, 
@@ -42,10 +43,9 @@ static void _helper_cb(
                            void* context);
 
 PointCloudInterface::PointCloudInterface(
-    ros::NodeHandle rosNodeHandle,
-    ros::NodeHandle rosNodeHandleParams,
+    rclcpp::Node::SharedPtr nh,
     const char *    name) :
-    GenericInterface(rosNodeHandle, rosNodeHandleParams, name)
+    GenericInterface(nh, name)
 {
 
     //TODO Different frames
@@ -70,8 +70,9 @@ void PointCloudInterface::AdvertiseTopics(){
 
     char topicName[64];
     sprintf(topicName, "%s", m_pipeName);
-    m_pcPublisher         = m_rosNodeHandle.advertise<sensor_msgs::PointCloud2>
-                                (topicName, 3);
+
+    m_pcPublisher = m_rosNodeHandle->create_publisher<sensor_msgs::msg::PointCloud2>
+        (topicName, rclcpp::SensorDataQoS());
 
     m_state = ST_AD;
 
@@ -79,14 +80,14 @@ void PointCloudInterface::AdvertiseTopics(){
 
 void PointCloudInterface::StopAdvertising(){
 
-    m_pcPublisher.shutdown();
+    m_pcPublisher.reset();
 
     m_state = ST_CLEAN;
 
 }
 
 int PointCloudInterface::GetNumClients(){
-    return m_pcPublisher.getNumSubscribers();
+    return m_pcPublisher->get_subscription_count();
 }
 
 // called when the simple helper has data for us
@@ -97,9 +98,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 
     if(interface->GetState() != ST_RUNNING) return;
 
-    sensor_msgs::PointCloud2&   pcMsg =                 interface->GetPCMsg();
-    ros::Publisher&             pcPublisher =           interface->GetPCPublisher();
-
+    sensor_msgs::msg::PointCloud2& pcMsg = interface->GetPCMsg();
     if(interface->m_inputPCType != meta.format){
 
     	switch (meta.format) {
@@ -121,7 +120,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 			    for (index = 0; index < 3; index++)
 			    {
 			        pcMsg.fields[index].offset = sizeof(float) * index;
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::FLOAT32;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::FLOAT32;
 			        pcMsg.fields[index].count = 1;
 			    }
 
@@ -147,7 +146,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 			    for (index = 0; index < 4; index++)
 			    {
 			        pcMsg.fields[index].offset = sizeof(float) * index;
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::FLOAT32;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::FLOAT32;
 			        pcMsg.fields[index].count = 1;
 			    }
     			break;
@@ -174,14 +173,14 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 			    for (index = 0; index < 3; index++)
 			    {
 			        pcMsg.fields[index].offset = sizeof(float) * index;
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::FLOAT32;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::FLOAT32;
 			        pcMsg.fields[index].count = 1;
 			    }
 
 			    for (index = 3; index < 6; index++)
 			    {
 			        pcMsg.fields[index].offset = (sizeof(float) * 3) + (sizeof(uint8_t) * (index - 3));
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::UINT8;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::UINT8;
 			        pcMsg.fields[index].count = 1;
 			    }
 
@@ -210,14 +209,14 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 			    for (index = 0; index < 4; index++)
 			    {
 			        pcMsg.fields[index].offset = sizeof(float) * index;
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::FLOAT32;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::FLOAT32;
 			        pcMsg.fields[index].count = 1;
 			    }
 
 			    for (index = 4; index < 7; index++)
 			    {
 			        pcMsg.fields[index].offset = (sizeof(float) * 4) + (sizeof(uint8_t) * (index - 4));
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::UINT8;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::UINT8;
 			        pcMsg.fields[index].count = 1;
 			    }
 
@@ -241,7 +240,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 			    for (index = 0; index < 2; index++)
 			    {
 			        pcMsg.fields[index].offset = sizeof(float) * index;
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::FLOAT32;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::FLOAT32;
 			        pcMsg.fields[index].count = 1;
 			    }
 
@@ -266,7 +265,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 			    for (index = 0; index < 3; index++)
 			    {
 			        pcMsg.fields[index].offset = sizeof(float) * index;
-			        pcMsg.fields[index].datatype = sensor_msgs::PointField::FLOAT32;
+			        pcMsg.fields[index].datatype = sensor_msgs::msg::PointField::FLOAT32;
 			        pcMsg.fields[index].count = 1;
 			    }
 
@@ -287,9 +286,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 
     }
 
-
-    int64_t timestamp = meta.timestamp_ns;
-    pcMsg.header.stamp.fromNSec(timestamp);
+    pcMsg.header.stamp.nanosec = meta.timestamp_ns;
 
     switch (meta.format) {
 
@@ -389,7 +386,7 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 		}
 
 	}
-    pcPublisher.publish(pcMsg);
 
+	interface->m_pcPublisher->publish(pcMsg);
     return;
 }

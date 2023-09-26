@@ -32,8 +32,8 @@
  ******************************************************************************/
 #include <modal_pipe.h>
 #include <string.h>
-#include <sensor_msgs/image_encodings.hpp>
 
+#include "voxl_mpa_to_ros2/utils/camera_helpers.h"
 #include "voxl_mpa_to_ros2/interfaces/camera_interface.h"
 
 static void _frame_cb(
@@ -82,53 +82,6 @@ int CameraInterface::GetNumClients(){
     return m_rosImagePublisher.getNumSubscribers();
 }
 
-int GetStepSize(int format){
-    switch (format){
-
-        case IMAGE_FORMAT_RAW8 :
-        case IMAGE_FORMAT_STEREO_RAW8 :
-            return 1;
-
-        case IMAGE_FORMAT_RAW16 :
-        case IMAGE_FORMAT_YUV422 :
-            return 2;
-
-        case IMAGE_FORMAT_RGB :
-            return 3;
-
-        case IMAGE_FORMAT_FLOAT32 :
-            return 4;
-
-        default:
-            return -1; //unsupported
-    }
-}
-
-const std::string GetRosFormat(int format){
-    switch (format){
-
-        case IMAGE_FORMAT_RAW8 :
-        case IMAGE_FORMAT_STEREO_RAW8 :
-            return sensor_msgs::image_encodings::MONO8;
-
-        case IMAGE_FORMAT_RAW16 :
-            return sensor_msgs::image_encodings::MONO16;
-
-        case IMAGE_FORMAT_YUV422 :
-            return sensor_msgs::image_encodings::YUV422;
-
-        case IMAGE_FORMAT_RGB :
-            return sensor_msgs::image_encodings::RGB8;
-
-        case IMAGE_FORMAT_FLOAT32 :
-            return sensor_msgs::image_encodings::TYPE_32FC1;
-
-        default:
-            return std::string("UNSUPPORTED"); //unsupported
-    }
-}
-
-
 // helper callback whenever a frame arrives
 static void _frame_cb(
     __attribute__((unused)) int ch,
@@ -138,8 +91,6 @@ static void _frame_cb(
 {
 
     CameraInterface *interface = (CameraInterface *) context;
-
-    printf("%s frame: %d\n", interface->GetPipeName(), meta.frame_id);
 
     if(interface->GetState() != ST_RUNNING) return;
 

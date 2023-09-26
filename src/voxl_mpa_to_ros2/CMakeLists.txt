@@ -82,7 +82,9 @@ add_executable(${PROJECT_NAME}_node
     src/interfaces/imu_interface.cpp
     src/interfaces/pose_vel_6dof_interface.cpp
     src/interfaces/camera_interface.cpp
+    src/interfaces/point_cloud_interface.cpp
     src/utils/common_utils.cpp
+    src/utils/camera_helpers.cpp
     src/interface_manager.cpp
     src/mpa_ros_node.cpp
 )

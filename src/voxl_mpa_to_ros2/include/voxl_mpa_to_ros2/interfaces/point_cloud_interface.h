@@ -34,15 +34,14 @@
 #ifndef PC_MPA_INTERFACE
 #define PC_MPA_INTERFACE
 
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include "generic_interface.h"
 
 class PointCloudInterface: public GenericInterface
 {
 public:
-    PointCloudInterface(ros::NodeHandle rosNodeHandle,
-                 ros::NodeHandle rosNodeHandleParams,
+    PointCloudInterface(rclcpp::Node::SharedPtr nh,
                  const char*     name);
 
     ~PointCloudInterface() { };
@@ -51,20 +50,16 @@ public:
     void AdvertiseTopics();
     void StopAdvertising();
 
-    sensor_msgs::PointCloud2& GetPCMsg(){
+    sensor_msgs::msg::PointCloud2& GetPCMsg(){
         return m_pcMsg;
     }
-    ros::Publisher& GetPCPublisher(){
-        return m_pcPublisher;
-    }
+
     uint m_inputPCType = -1;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr m_pcPublisher;
 
 private:
 
-    sensor_msgs::PointCloud2               m_pcMsg;                        ///< Point cloud message
-    ros::Publisher                         m_pcPublisher;                  ///< Point cloud publisher
-
-
+    sensor_msgs::msg::PointCloud2               m_pcMsg;                        ///< Point cloud message
 
 };
 #endif

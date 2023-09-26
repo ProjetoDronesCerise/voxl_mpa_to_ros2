@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2021 ModalAI Inc.
+ * Copyright 2023 ModalAI Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,7 @@
 #include "voxl_mpa_to_ros2/utils/camera_helpers.h"
 #include <modal_pipe.h>
 #include <string> 
-#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/image_encodings.hpp>
 
 int GetStepSize(int format){
     switch (format){
@@ -52,14 +52,6 @@ int GetStepSize(int format){
 
         case IMAGE_FORMAT_FLOAT32 :
             return 4;
-
-/*
-        case IMAGE_FORMAT_NV12 :
-        case IMAGE_FORMAT_H264 :
-        case IMAGE_FORMAT_H265 :
-        case IMAGE_FORMAT_NV21 :
-        case IMAGE_FORMAT_JPG :
-        case IMAGE_FORMAT_YUV420 :*/
         default:
             return -1; //unsupported
     }
@@ -83,13 +75,6 @@ const std::string GetRosFormat(int format){
 
         case IMAGE_FORMAT_FLOAT32 :
             return sensor_msgs::image_encodings::TYPE_32FC1;
-/*
-        case IMAGE_FORMAT_NV12 :
-        case IMAGE_FORMAT_H264 :
-        case IMAGE_FORMAT_H265 :
-        case IMAGE_FORMAT_NV21 :
-        case IMAGE_FORMAT_JPG :
-        case IMAGE_FORMAT_YUV420 :*/
         default:
             return std::string("UNSUPPORTED"); //unsupported
     }
