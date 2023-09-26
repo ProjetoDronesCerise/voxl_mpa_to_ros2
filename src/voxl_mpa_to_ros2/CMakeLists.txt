@@ -60,6 +60,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(image_transport REQUIRED)
 
 include_directories(include) 
 
@@ -71,6 +72,7 @@ set(dependencies
   rosidl_default_generators
   geometry_msgs
   sensor_msgs
+  image_transport
   nav_msgs
   tf2
   tf2_ros
@@ -79,6 +81,7 @@ set(dependencies
 add_executable(${PROJECT_NAME}_node
     src/interfaces/imu_interface.cpp
     src/interfaces/pose_vel_6dof_interface.cpp
+    src/interfaces/camera_interface.cpp
     src/utils/common_utils.cpp
     src/interface_manager.cpp
     src/mpa_ros_node.cpp

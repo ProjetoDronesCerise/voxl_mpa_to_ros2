@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2021 ModalAI Inc.
+ * Copyright 2023 ModalAI Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,8 +32,9 @@
  ******************************************************************************/
 #include <modal_pipe.h>
 #include <string.h>
-#include "camera_interface.h"
-#include "camera_helpers.h"
+#include <sensor_msgs/image_encodings.hpp>
+
+#include "voxl_mpa_to_ros2/interfaces/camera_interface.h"
 
 static void _frame_cb(
     __attribute__((unused)) int ch,
@@ -42,18 +43,17 @@ static void _frame_cb(
                             void* context);
 
 CameraInterface::CameraInterface(
-    ros::NodeHandle rosNodeHandle,
-    ros::NodeHandle rosNodeHandleParams,
-    const char *    camName) :
-    GenericInterface(rosNodeHandle, rosNodeHandleParams, camName)
+    rclcpp::Node::SharedPtr nh,
+    const char *    name) :
+    GenericInterface(nh, name)
 {
 
-    m_imageMsg.header.frame_id = camName;
+    m_imageMsg.header.frame_id = name;
     m_imageMsg.is_bigendian    = false;
 
     pipe_client_set_camera_helper_cb(m_channel, _frame_cb, this);
 
-    if(pipe_client_open(m_channel, camName, PIPE_CLIENT_NAME,
+    if(pipe_client_open(m_channel, name, PIPE_CLIENT_NAME,
                 EN_PIPE_CLIENT_CAMERA_HELPER | CLIENT_FLAG_START_PAUSED, 0)){
         pipe_client_close(m_channel);//Make sure we unclaim the channel
         throw -1;
@@ -82,6 +82,53 @@ int CameraInterface::GetNumClients(){
     return m_rosImagePublisher.getNumSubscribers();
 }
 
+int GetStepSize(int format){
+    switch (format){
+
+        case IMAGE_FORMAT_RAW8 :
+        case IMAGE_FORMAT_STEREO_RAW8 :
+            return 1;
+
+        case IMAGE_FORMAT_RAW16 :
+        case IMAGE_FORMAT_YUV422 :
+            return 2;
+
+        case IMAGE_FORMAT_RGB :
+            return 3;
+
+        case IMAGE_FORMAT_FLOAT32 :
+            return 4;
+
+        default:
+            return -1; //unsupported
+    }
+}
+
+const std::string GetRosFormat(int format){
+    switch (format){
+
+        case IMAGE_FORMAT_RAW8 :
+        case IMAGE_FORMAT_STEREO_RAW8 :
+            return sensor_msgs::image_encodings::MONO8;
+
+        case IMAGE_FORMAT_RAW16 :
+            return sensor_msgs::image_encodings::MONO16;
+
+        case IMAGE_FORMAT_YUV422 :
+            return sensor_msgs::image_encodings::YUV422;
+
+        case IMAGE_FORMAT_RGB :
+            return sensor_msgs::image_encodings::RGB8;
+
+        case IMAGE_FORMAT_FLOAT32 :
+            return sensor_msgs::image_encodings::TYPE_32FC1;
+
+        default:
+            return std::string("UNSUPPORTED"); //unsupported
+    }
+}
+
+
 // helper callback whenever a frame arrives
 static void _frame_cb(
     __attribute__((unused)) int ch,
@@ -97,9 +144,9 @@ static void _frame_cb(
     if(interface->GetState() != ST_RUNNING) return;
 
     image_transport::Publisher& publisher = interface->GetPublisher();
-    sensor_msgs::Image& img = interface->GetImageMsg();
+    sensor_msgs::msg::Image& img = interface->GetImageMsg();
 
-    img.header.stamp.fromNSec(meta.timestamp_ns);
+    img.header.stamp.nanosec = meta.timestamp_ns;
     img.width    = meta.width;
     img.height   = meta.height;
 

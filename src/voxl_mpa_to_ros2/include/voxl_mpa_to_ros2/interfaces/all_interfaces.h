@@ -35,13 +35,13 @@
 #define ALL_MPA_INTERFACES
 
 #include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
-// #include "camera_interface.h"
-// #include "stereo_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/camera_interface.h"
 #include "voxl_mpa_to_ros2/interfaces/imu_interface.h"
 #include "voxl_mpa_to_ros2/interfaces/pose_vel_6dof_interface.h"
 
 // #include "vio_interface.h"
 // #include "point_cloud_interface.h"
+// #include "stereo_interface.h"
 
 enum InterfaceType {
     INT_NOT_SUPPORTED=-2,

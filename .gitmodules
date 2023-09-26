@@ -4,3 +4,7 @@
 [submodule "src/px4_ros_com"]
 	path = src/px4_ros_com
 	url = https://github.com/PX4/px4_ros_com
+[submodule "src/image_common"]
+	path = src/image_common
+	url = https://github.com/ros-perception/image_common
+	branch = foxy

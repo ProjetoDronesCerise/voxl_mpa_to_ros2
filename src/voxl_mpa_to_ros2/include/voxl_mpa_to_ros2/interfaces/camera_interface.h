@@ -34,19 +34,17 @@
 #ifndef CAMERA_MPA_INTERFACE
 #define CAMERA_MPA_INTERFACE
 
-#include <sensor_msgs/image_encodings.h>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/msg/image.hpp>
 #include <image_transport/image_transport.h>
 #include <image_transport/publisher.h>
 
-#include "generic_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
 
 class CameraInterface: public GenericInterface
 {
 public:
-    CameraInterface(ros::NodeHandle rosNodeHandle,
-                    ros::NodeHandle rosNodeHandleParams,
-                    const char*     camName);
+    CameraInterface(rclcpp::Node::SharedPtr nh,
+                 const char*     name);
 
     ~CameraInterface() { };
 
@@ -54,7 +52,7 @@ public:
     void AdvertiseTopics();
     void StopAdvertising();
 
-    sensor_msgs::Image& GetImageMsg(){
+    sensor_msgs::msg::Image& GetImageMsg(){
         return m_imageMsg;
     }
 
@@ -64,7 +62,7 @@ public:
 
 private:
 
-    sensor_msgs::Image                     m_imageMsg;                   ///< Image message
+    sensor_msgs::msg::Image                     m_imageMsg;                   ///< Image message
     image_transport::Publisher             m_rosImagePublisher;          ///< Image publisher
 
 };

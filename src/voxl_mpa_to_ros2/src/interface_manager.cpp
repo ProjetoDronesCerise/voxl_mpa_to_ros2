@@ -140,6 +140,8 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 				curType = INT_IMU;
 			} else if(!strncmp(buf, "pose_vel_6dof_t", strlen("pose_vel_6dof_t"))){
 				curType = INT_6DOF;
+			} else if(!strncmp(buf, "camera_image_metadata_t", strlen("camera_image_metadata_t"))){
+				curType = INT_CAMERA;
 			} else {
 				curType = INT_NOT_SUPPORTED;
 			} 
@@ -187,7 +189,11 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 					case INT_6DOF:
 					 	newNode->interface = new PoseVel6DOFInterface(nh, newNode->name);
 						break;
-
+					
+					case INT_CAMERA:
+						newNode->interface = new CameraInterface(nh, newNode->name);
+						break;
+						
 					default: //Should never get here
 						break;
 
