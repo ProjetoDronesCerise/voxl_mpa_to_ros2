@@ -16,11 +16,10 @@ ROS2 Foxy Nodes that takes in mpa data and published it to ROS2
 
 ### Installation
 Install mpa-to-ros2 by running (VOXL):
-```
+
 (VOXL2/RB5):
-```
-apt install voxl-mpa-to-ros2
-```
+
+```apt install voxl-mpa-to-ros2```
 
 ### Start Installed MPA ROS2 Node
 
@@ -32,9 +31,7 @@ Source the ros2 foxy setup script:
 
 You can then run the nodes with: 
 
-```
-ros2 launch voxl_mpa_to_ros2 voxl_mpa_to_ros2.launch
-```
+```ros2 launch voxl_mpa_to_ros2 voxl_mpa_to_ros2.launch```
 
 ##### Supported Interfaces
 The current supported mpa->ros2 translations are:  
@@ -60,5 +57,4 @@ Found new interface: tof_ir
 Found new interface: tof_noise
 Found new interface: tracking
 Found new interface: tof_pc
-
 ```
