@@ -31,8 +31,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include <modal_pipe.h>
-#include "stereo_interface.h"
-#include "camera_helpers.h"
+
+#include "voxl_mpa_to_ros2/utils/camera_helpers.h"
+#include "voxl_mpa_to_ros2/interfaces/stereo_interface.h"
 
 static void _frame_cb(
     __attribute__((unused)) int ch,
@@ -41,10 +42,9 @@ static void _frame_cb(
                             void* context);
 
 StereoInterface::StereoInterface(
-    ros::NodeHandle rosNodeHandle,
-    ros::NodeHandle rosNodeHandleParams,
-    const char *    camName) :
-    GenericInterface(rosNodeHandle, rosNodeHandleParams, camName)
+    rclcpp::Node::SharedPtr nh,
+    const char *    name) :
+    GenericInterface(nh, name)
 {
 
     char frameName[64];
@@ -59,7 +59,7 @@ StereoInterface::StereoInterface(
 
     pipe_client_set_camera_helper_cb(m_channel, _frame_cb, this);
 
-    if(pipe_client_open(m_channel, camName, PIPE_CLIENT_NAME,
+    if(pipe_client_open(m_channel, name, PIPE_CLIENT_NAME,
                 EN_PIPE_CLIENT_CAMERA_HELPER | CLIENT_FLAG_START_PAUSED, 0)){
         pipe_client_close(m_channel);//Make sure we unclaim the channel
         throw -1;
@@ -108,25 +108,25 @@ static void _frame_cb(
 
     if(interface->GetState() != ST_RUNNING) return;
 
-    if(meta.format != IMAGE_FORMAT_STEREO_RAW8){
+    if(meta.format != IMAGE_FORMAT_STEREO_RAW8 && meta.format != IMAGE_FORMAT_RAW8){
         printf("Stereo interface received non-stereo frame, exiting stereo\n");
         interface->StopPublishing();
         interface->StopAdvertising();
     }
 
     image_transport::Publisher& publisherL = interface->GetPublisherL();
-    sensor_msgs::Image& imgL = interface->GetImageMsgL();
+    sensor_msgs::msg::Image& imgL = interface->GetImageMsgL();
 
     image_transport::Publisher& publisherR = interface->GetPublisherR();
-    sensor_msgs::Image& imgR = interface->GetImageMsgR();
+    sensor_msgs::msg::Image& imgR = interface->GetImageMsgR();
 
-    imgL.header.stamp.fromNSec(meta.timestamp_ns);
+    imgL.header.stamp.nanosec = meta.timestamp_ns;
     imgL.width    = meta.width;
     imgL.height   = meta.height;
     imgL.step     = meta.width;
     imgL.encoding = GetRosFormat(meta.format);
 
-    imgR.header.stamp.fromNSec(meta.timestamp_ns);
+    imgR.header.stamp.nanosec = meta.timestamp_ns;
     imgR.width    = meta.width;
     imgR.height   = meta.height;
     imgR.step     = meta.width;
@@ -137,8 +137,13 @@ static void _frame_cb(
     imgL.data.resize(dataSize);
     imgR.data.resize(dataSize);
 
-    memcpy(&(imgL.data[0]), frame, dataSize);
-    memcpy(&(imgR.data[0]), &frame[dataSize], dataSize);
+    if(meta.format == IMAGE_FORMAT_STEREO_RAW8){
+        memcpy(&(imgL.data[0]), frame, dataSize);
+        memcpy(&(imgR.data[0]), &frame[dataSize], dataSize);
+    } else {
+        memcpy(&(imgL.data[0]), frame, dataSize);
+        memcpy(&(imgR.data[0]), frame, dataSize);
+    }
 
     publisherL.publish(imgL);
     publisherR.publish(imgR);

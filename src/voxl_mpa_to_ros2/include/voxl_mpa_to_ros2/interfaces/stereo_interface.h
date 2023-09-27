@@ -34,19 +34,17 @@
 #ifndef STEREO_MPA_INTERFACE
 #define STEREO_MPA_INTERFACE
 
-#include <sensor_msgs/image_encodings.h>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/msg/image.hpp>
 #include <image_transport/image_transport.h>
 #include <image_transport/publisher.h>
 
-#include "generic_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
 
 class StereoInterface: public GenericInterface
 {
 public:
-    StereoInterface(ros::NodeHandle rosNodeHandle,
-                    ros::NodeHandle rosNodeHandleParams,
-                    const char*     camName);
+    StereoInterface(rclcpp::Node::SharedPtr nh,
+                 const char*     name);
 
     ~StereoInterface() { };
 
@@ -54,10 +52,10 @@ public:
     void AdvertiseTopics();
     void StopAdvertising();
 
-    sensor_msgs::Image& GetImageMsgL(){
+    sensor_msgs::msg::Image& GetImageMsgL(){
         return m_imageMsgL;
     }
-    sensor_msgs::Image& GetImageMsgR(){
+    sensor_msgs::msg::Image& GetImageMsgR(){
         return m_imageMsgR;
     }
 
@@ -70,10 +68,10 @@ public:
 
 private:
 
-    sensor_msgs::Image                     m_imageMsgL;                   ///< Image message
+    sensor_msgs::msg::Image                m_imageMsgL;                   ///< Image message
     image_transport::Publisher             m_rosImagePublisherL;          ///< Image publisher
 
-    sensor_msgs::Image                     m_imageMsgR;                   ///< Image message
+    sensor_msgs::msg::Image                m_imageMsgR;                   ///< Image message
     image_transport::Publisher             m_rosImagePublisherR;          ///< Image publisher
 
 };

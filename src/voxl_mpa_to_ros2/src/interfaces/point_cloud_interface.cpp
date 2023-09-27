@@ -100,7 +100,6 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
 
     sensor_msgs::msg::PointCloud2& pcMsg = interface->GetPCMsg();
     if(interface->m_inputPCType != meta.format){
-
     	switch (meta.format) {
 
     		case POINT_CLOUD_FORMAT_FLOAT_XYZ:{
@@ -291,7 +290,6 @@ static void _helper_cb (int ch, point_cloud_metadata_t meta, void* data, void* c
     switch (meta.format) {
 
     	case POINT_CLOUD_FORMAT_FLOAT_XYZ:{
-    	
     		float* dataPoints = (float*)data;
 
 		    for(uint32_t i = 0; i < meta.n_points; i++){

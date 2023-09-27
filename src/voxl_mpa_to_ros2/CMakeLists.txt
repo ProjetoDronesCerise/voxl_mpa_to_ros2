@@ -83,6 +83,7 @@ add_executable(${PROJECT_NAME}_node
     src/interfaces/pose_vel_6dof_interface.cpp
     src/interfaces/camera_interface.cpp
     src/interfaces/point_cloud_interface.cpp
+    src/interfaces/stereo_interface.cpp
     src/utils/common_utils.cpp
     src/utils/camera_helpers.cpp
     src/interface_manager.cpp
