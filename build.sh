@@ -43,7 +43,7 @@ colcon build
 
 cd ..
 
-mkdir -p misc_files/opt/ros/${ROS_DIST}/
-cp -r colcon_ws/install/lib/  misc_files/opt/ros/${ROS_DIST}/
-cp -r colcon_ws/install/share/  misc_files/opt/ros/${ROS_DIST}/
+mkdir -p misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
+cp -r colcon_ws/install/  misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
+cp -r colcon_ws/build/ misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
 chmod -R 777 misc_files
