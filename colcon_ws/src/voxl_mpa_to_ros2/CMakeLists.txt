@@ -61,6 +61,7 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(voxl_msgs REQUIRED)
 
 include_directories(include) 
 
@@ -73,6 +74,7 @@ set(dependencies
   geometry_msgs
   sensor_msgs
   image_transport
+  voxl_msgs
   nav_msgs
   tf2
   tf2_ros
@@ -84,6 +86,8 @@ add_executable(${PROJECT_NAME}_node
     src/interfaces/camera_interface.cpp
     src/interfaces/point_cloud_interface.cpp
     src/interfaces/stereo_interface.cpp
+    src/interfaces/qvio_interface.cpp
+    src/interfaces/ai_detection_interface.cpp
     src/utils/common_utils.cpp
     src/utils/camera_helpers.cpp
     src/interface_manager.cpp

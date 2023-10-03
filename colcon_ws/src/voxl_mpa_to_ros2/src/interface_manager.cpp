@@ -144,6 +144,10 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 				curType = INT_CAMERA;
 			} else if(!strncmp(buf, "point_cloud_metadata_t", strlen("point_cloud_metadata_t"))){
 				curType = INT_PC;	
+			} else if(!strncmp(buf, "vio_data_t", strlen("vio_data_t"))){
+				curType = INT_VIO;
+			} else if(!strncmp(buf, "ai_detection_t", strlen("ai_detection_t"))){
+				curType = INT_AI;
 			} else {
 				curType = INT_NOT_SUPPORTED;
 			} 
@@ -198,6 +202,14 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 						
 					case INT_PC:
 						newNode->interface = new PointCloudInterface(nh, newNode->name);
+						break;
+
+					case INT_VIO:
+						newNode->interface = new QVIOInterface(nh, newNode->name);
+						break;
+
+					case INT_AI:
+						newNode->interface = new AiDetectionInterface(nh, newNode->name);
 						break;
 
 					default: //Should never get here

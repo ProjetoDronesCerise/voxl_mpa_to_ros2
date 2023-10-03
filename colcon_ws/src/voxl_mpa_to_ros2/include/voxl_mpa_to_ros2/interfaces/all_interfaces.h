@@ -39,9 +39,8 @@
 #include "voxl_mpa_to_ros2/interfaces/imu_interface.h"
 #include "voxl_mpa_to_ros2/interfaces/pose_vel_6dof_interface.h"
 #include "voxl_mpa_to_ros2/interfaces/point_cloud_interface.h"
-
-// #include "vio_interface.h"
-// #include "stereo_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/qvio_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/ai_detection_interface.h"
 
 enum InterfaceType {
     INT_NOT_SUPPORTED=-2,
@@ -51,7 +50,8 @@ enum InterfaceType {
     INT_IMU,
     INT_VIO,
     INT_PC,
-    INT_6DOF
+    INT_6DOF,
+    INT_AI
 };
 
 #endif
