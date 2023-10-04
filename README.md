@@ -2,7 +2,13 @@
 
 ROS2 Foxy Nodes that takes in mpa data and published it to ROS2
 
-## Build Instructions
+## Build Instructions if running directly on target (VOXL2)
+1. Ensure you have ros2 foxy installed on target - if not please execute the `./install_foxy.sh` command which will take about 20 minutes to run
+2. Once installed, proceed to `cd` into the `colcon_ws` directory and run a `colcon build`
+3. Once done, proceed to source the install/setup.script: `source install/setup.bash`
+4. Once this is done the user can now run the voxl-mpa-to-ros2 code base by running `ros2 run voxl_mpa_to_ros2 voxl_mpa_to_ros2`
+
+## Build Instructions if running in qrb5165-emulator and pushing to voxl2 post build
 
 1. Requires the qrb5165-emulator (found [here](https://gitlab.com/voxl-public/support/voxl-docker)) to run docker ARM image
     * (PC) ```cd [Path To]/voxl-mpa-to-ros2```
