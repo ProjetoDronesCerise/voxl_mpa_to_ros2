@@ -11,7 +11,8 @@
 DEPS_QRB5165="
 libmodal-json
 libmodal-pipe
-libvoxl-cutils"
+libvoxl-cutils
+voxl-ros2-foxy"
 
 ## this list is just for tab-completion
 ## it's not an exhaustive list of platforms available.
@@ -66,8 +67,10 @@ if [ "$MODE" == "DEB" ]; then
     ## install the user's list of dependencies
     echo "installing: $DEPS_QRB5165"
     apt install -y $DEPS_QRB5165
+    apt install -y libeigen3-dev
+    python3 -m pip install pip -U
+    python3 -m pip install colcon-common-extensions lark
 
-# install IPK packages with opkg
 fi
 
 echo ""

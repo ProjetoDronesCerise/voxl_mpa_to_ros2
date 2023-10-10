@@ -17,5 +17,5 @@ rm -rf .bash_history
 
 rm -rf colcon_ws/build/
 rm -rf colcon_ws/install/
-rm -rf colcon_ws/devel/
+rm -rf colcon_ws/log/
 rm -rf misc_files

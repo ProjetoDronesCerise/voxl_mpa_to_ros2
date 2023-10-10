@@ -96,29 +96,31 @@ int AiDetectionInterface::GetNumClients(){
 // called when the simple helper has data for us
 static void _helper_cb(__attribute__((unused))int ch, char* data, int bytes, void* context)
 {
-    ai_detection_t detection;
-    memcpy ( &detection, data, sizeof(ai_detection_t) );
-
-    if (detection.magic_number != AI_DETECTION_MAGIC_NUMBER) return;
-
     AiDetectionInterface *interface = (AiDetectionInterface *) context;
     if(interface->GetState() != ST_RUNNING) return;
 
     voxl_msgs::msg::Aidetection& obj = interface->GetObjMsg();
 
-    //publish the sample
-    obj.timestamp_ns = detection.timestamp_ns;
-    obj.class_id = detection.class_id;
-    obj.frame_id = detection.frame_id;
-    obj.class_name = detection.class_name;
-    obj.cam = detection.cam;
-    obj.class_confidence = detection.class_confidence;
-    obj.detection_confidence = detection.detection_confidence;
-    obj.x_min = detection.x_min;
-    obj.y_min = detection.y_min;
-    obj.x_max = detection.x_max;
-    obj.y_max = detection.y_max;
-    interface->ai_detection_pub_->publish(obj);
+    int n_packets = bytes / sizeof(ai_detection_t);
+    ai_detection_t* detections = (ai_detection_t*) data;
+
+    for(int i=0;i<n_packets;i++){
+        if (detections[i].magic_number != AI_DETECTION_MAGIC_NUMBER) return;
+
+        //publish the sample
+        obj.timestamp_ns = detections[i].timestamp_ns;
+        obj.class_id = detections[i].class_id;
+        obj.frame_id = detections[i].frame_id;
+        obj.class_name = detections[i].class_name;
+        obj.cam = detections[i].cam;
+        obj.class_confidence = detections[i].class_confidence;
+        obj.detection_confidence = detections[i].detection_confidence;
+        obj.x_min = detections[i].x_min;
+        obj.y_min = detections[i].y_min;
+        obj.x_max = detections[i].x_max;
+        obj.y_max = detections[i].y_max;
+        interface->ai_detection_pub_->publish(obj);
+    }
 
     return;
 }
