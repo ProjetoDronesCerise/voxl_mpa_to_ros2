@@ -8,7 +8,8 @@
 
 set -e
 
-cd colcon_ws
+current_dir=$(pwd)
+cd $current_dir/colcon_ws
 
 AVAILABLE_PLATFORMS="qrb5165"
 
@@ -40,8 +41,7 @@ esac
 . /opt/ros/${ROS_DIST}/setup.bash
 
 colcon build
-
-cd ..
+cd $current_dir
 
 mkdir -p misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
 cp -r colcon_ws/install/  misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
