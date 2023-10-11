@@ -66,6 +66,8 @@ if [ "$MODE" == "DEB" ]; then
 
     ## install the user's list of dependencies
     echo "installing: $DEPS_QRB5165"
+    apt update
+    apt install --fix-missing
     apt install -y $DEPS_QRB5165
     apt install -y libeigen3-dev
     apt install -y python3-pip
