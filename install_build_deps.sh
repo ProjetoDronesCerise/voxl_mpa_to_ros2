@@ -68,6 +68,7 @@ if [ "$MODE" == "DEB" ]; then
     echo "installing: $DEPS_QRB5165"
     apt install -y $DEPS_QRB5165
     apt install -y libeigen3-dev
+    apt install -y python3-pip
     python3 -m pip install pip -U
     python3 -m pip install colcon-common-extensions lark
 
