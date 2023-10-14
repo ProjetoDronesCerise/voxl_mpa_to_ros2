@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
-# add to bashrc
-echo 'source /opt/ros/foxy/mpa_to_ros2/install/setup.bash' >> ~/.bashrc 
-source ~/.bashrc
+# source the foxy setup if it's their in case the user wants to start using
+# it right away after install. The following 5 lines are also loaded into
+# ~/.profile.d/ to get run normally too
+
+FOXYFILE="/opt/ros/foxy/local_setup.bash"
+MPA_TO_ROS2_FILE="/opt/ros/foxy/mpa_to_ros2/install/setup.bash"
+if [ -f $FOXYFILE ]; then
+	source $MPA_TO_ROS2_FILE
+fi
