@@ -29,8 +29,6 @@ class OffboardFigure8Node(Node):
             TrajectorySetpoint, '/fmu/in/trajectory_setpoint', qos_profile)
         self.vehicle_command_publisher = self.create_publisher(
             VehicleCommand, '/fmu/in/vehicle_command', qos_profile)
-        #self.vehicle_local_position_subscriber = self.create_subscription(
-        #    VehicleLocalPosition, '/fmu/out/vehicle_local_position', self.vehicle_local_position_callback, qos_profile)
         self.vehicle_status_subscriber = self.create_subscription(
             VehicleStatus, '/fmu/out/vehicle_status', self.vehicle_status_callback, qos_profile)
 
@@ -48,7 +46,7 @@ class OffboardFigure8Node(Node):
         self.armed = False
         self.offboard_setpoint_counter = 0
         self.start_time = time.time()
-
+        self.offboard_arr_counter = 0
         self.init_path()
 
         self.timer = self.create_timer(0.1, self.timer_callback)
@@ -78,7 +76,7 @@ class OffboardFigure8Node(Node):
             msg.velocity = [-dadt*r* s*( ss + 2.0*cc + 1.0)/sspos, dadt*r* ( ss*ss + ss + ssmo*cc )/sspos, 0.0]
             msg.acceleration = [-dadt*dadt*8.0*r*s*c*((3.0*c2a) + 7.0)/(c2am3*c2am3*c2am3), dadt*dadt*r*((44.0*c2a) + c4a -21.0)/(c2am3*c2am3*c2am3), 0.0]
             msg.yaw = math.atan2(msg.velocity[0], msg.velocity[1]) + (math.pi/2.0)
-            
+
             self.path.append(msg)
 
         for i in range(self.steps):
@@ -90,7 +88,7 @@ class OffboardFigure8Node(Node):
                 next_yaw -= (2.0 * math.pi)
             
             self.path[i].yawspeed = (next_yaw - curr)/dt
-        
+
     def timer_callback(self) -> None:
         """Callback function for the timer."""
         self.publish_offboard_control_heartbeat_signal()
@@ -108,7 +106,7 @@ class OffboardFigure8Node(Node):
         else:
             if(not self.hit_figure_8):
                 self.get_logger().info("Doing figure 8 now")                
-                self.publish_position_setpoint(self.path)
+                self.figure8_timer = self.create_timer(1 / self.rate, self.offboard_move_callback)
                 self.hit_figure_8 = True
 
     def vehicle_local_position_callback(self, vehicle_local_position):
@@ -143,7 +141,20 @@ class OffboardFigure8Node(Node):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
         self.get_logger().info("Switching to land mode")
         self.taken_off = False
-        self.hit_figure_8 = False
+        #self.hit_figure_8 = False
+
+    def offboard_move_callback(self):
+        if(self.offboard_arr_counter < len(self.path)):
+            self.trajectory_setpoint_publisher.publish(self.path[self.offboard_arr_counter])
+        
+        if(self.offboard_arr_counter >= len(self.path)):
+            self.publish_takeoff_setpoint(0.0, 0.0, self.altitude)
+        
+        if(self.offboard_arr_counter == len(self.path) + 100):
+            self.figure8_timer.cancel()
+            self.land()
+        
+        self.offboard_arr_counter += 1
 
     def publish_takeoff_setpoint(self, x: float, y: float, z: float):
         """Publish the trajectory setpoint."""
@@ -152,15 +163,6 @@ class OffboardFigure8Node(Node):
         msg.yaw = (-45.0 + 90.0) * math.pi / 180.0;  # (90 degree)
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.trajectory_setpoint_publisher.publish(msg)
-
-    def publish_position_setpoint(self, path_array):
-        """Publish the trajectory setpoint."""
-        for value in path_array:
-            value.timestamp = int(self.get_clock().now().nanoseconds / 1000)
-            self.trajectory_setpoint_publisher.publish(value)
-            time.sleep(0.1)
-            
-        self.land()
 
     def publish_offboard_control_heartbeat_signal(self):
         """Publish the offboard control mode."""
