@@ -43,7 +43,5 @@ esac
 colcon build
 cd $current_dir
 
-mkdir -p misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
-cp -r colcon_ws/install/  misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
-cp -r colcon_ws/build/ misc_files/opt/ros/${ROS_DIST}/mpa_to_ros2
-chmod -R 777 misc_files
+echo "Done Building!"
+

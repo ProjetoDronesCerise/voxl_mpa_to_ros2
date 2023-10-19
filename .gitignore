@@ -2,3 +2,13 @@ build/
 install/
 log/
 *deb
+.bash_history
+build
+build32
+build64
+*.ipk
+pkg/IPK
+pkg/DEB
+pkg/data
+*.core
+.vscode

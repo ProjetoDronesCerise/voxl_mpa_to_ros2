@@ -12,12 +12,13 @@ ROS2 Foxy Nodes that takes in mpa data and published it to ROS2
 
 1. Requires the qrb5165-emulator (found [here](https://gitlab.com/voxl-public/support/voxl-docker)) to run docker ARM image
     * (PC) ```cd [Path To]/voxl-mpa-to-ros2```
-    * (PC) ```sudo voxl-docker -i voxl-emulator```
+    * (PC) ```git submodule update --init --recursive```
+    * (PC) ```voxl-docker -i qrb5165-emulator```
 2. Build project binary:
     * (qrb5165-emulator) ```./install_build_deps.sh qrb5165 stable```
     * (qrb5165-emulator) ```./clean.sh```
-    * (qrb5165-emulator) ```./build.sh```
-    * (qrb5165-emulator) ```./make_package.sh ipk```
+    * (qrb5165-emulator) ```./build.sh qrb5165```
+    * (qrb5165-emulator) ```./make_package.sh```
 
 
 ### Installation

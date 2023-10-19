@@ -101,17 +101,27 @@ rm -rf $DEB_DIR
 # remove old ipk and deb packages
 rm -f *.deb
 
+
+
+
 ################################################################################
-## install compiled stuff into data directory with 'make install'
-## try this for all 3 possible build folders, some packages are multi-arch
-## so both 32 and 64 need installing to pkg directory.
+## ROS SPECIFIC STUFF
 ################################################################################
 
 # make sure build succeeded
-if ! [[ -d "misc_files" ]]; then
+if ! [[ -d "colcon_ws/install/" ]]; then
     echo "run build before make_package"
     exit 1
 fi
+
+
+ROS_DIST="foxy"
+mkdir -p $DATA_DIR/opt/ros/${ROS_DIST}/mpa_to_ros2
+cp -r colcon_ws/install/  $DATA_DIR/opt/ros/${ROS_DIST}/mpa_to_ros2
+cp -r colcon_ws/build/ $DATA_DIR/opt/ros/${ROS_DIST}/mpa_to_ros2
+
+
+
 
 ################################################################################
 ## install standard stuff common across ModalAI projects if they exist

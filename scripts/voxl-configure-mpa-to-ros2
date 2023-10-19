@@ -1,0 +1,21 @@
+#!/bin/bash
+
+FOXYFILE="/opt/ros/foxy/local_setup.bash"
+
+if ! [ -f $FOXYFILE ]; then
+	echo "you must install voxl-ros2-foxy first before you can use voxl-mpa-to-ros2"
+	exit 1
+fi
+
+apt install -y python3-pip python3-numpy
+
+python3 -m pip install pip -U
+python3 -m pip install colcon-common-extensions lark netifaces
+
+
+
+MPA_TO_ROS2_FILE="/opt/ros/foxy/mpa_to_ros2/install/setup.bash"
+source $MPA_TO_ROS2_FILE
+
+
+echo "done configuring voxl-mpa-to-ros2"

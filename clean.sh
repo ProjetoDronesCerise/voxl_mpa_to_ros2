@@ -4,18 +4,17 @@
 # author: zachary.lowell@ascendengineer.com
 
 
-rm -rf build/
-rm -rf build32/
-rm -rf build64/
-rm -rf pkg/control.tar.gz
-rm -rf pkg/data/
-rm -rf pkg/data.tar.gz
-rm -rf pkg/DEB/
-rm -rf pkg/IPK/
-rm -rf *.deb
-rm -rf .bash_history
+sudo rm -rf build/
+sudo rm -rf build32/
+sudo rm -rf build64/
+sudo rm -rf pkg/control.tar.gz
+sudo rm -rf pkg/data/
+sudo rm -rf pkg/data.tar.gz
+sudo rm -rf pkg/DEB/
+sudo rm -rf pkg/IPK/
+sudo rm -rf *.deb
+sudo rm -rf .bash_history
 
-rm -rf colcon_ws/build/
-rm -rf colcon_ws/install/
-rm -rf colcon_ws/log/
-rm -rf misc_files
+sudo rm -rf colcon_ws/build/
+sudo rm -rf colcon_ws/install/
+sudo rm -rf colcon_ws/log/
