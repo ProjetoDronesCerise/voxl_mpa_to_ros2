@@ -7,7 +7,7 @@ if ! [ -f $FOXYFILE ]; then
 	exit 1
 fi
 
-apt install -y python3-pip python3-numpy
+apt install -y python3-pip python3-numpy libtinyxml2-6
 
 python3 -m pip install pip -U
 python3 -m pip install colcon-common-extensions lark netifaces
@@ -16,6 +16,8 @@ python3 -m pip install colcon-common-extensions lark netifaces
 
 MPA_TO_ROS2_FILE="/opt/ros/foxy/mpa_to_ros2/install/setup.bash"
 source $MPA_TO_ROS2_FILE
+
+systemctl enable --now voxl-microdds-agent
 
 
 echo "done configuring voxl-mpa-to-ros2"
