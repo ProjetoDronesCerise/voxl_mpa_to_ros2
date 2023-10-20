@@ -75,7 +75,7 @@ class OffboardFigure8Node(Node):
             msg.position = [(r*c) / sspo, -(r*c*s) / sspo, self.altitude]
             msg.velocity = [-dadt*r* s*( ss + 2.0*cc + 1.0)/sspos, dadt*r* ( ss*ss + ss + ssmo*cc )/sspos, 0.0]
             msg.acceleration = [-dadt*dadt*8.0*r*s*c*((3.0*c2a) + 7.0)/(c2am3*c2am3*c2am3), dadt*dadt*r*((44.0*c2a) + c4a -21.0)/(c2am3*c2am3*c2am3), 0.0]
-            msg.yaw = math.atan2(msg.velocity[0], msg.velocity[1]) + (math.pi/2.0)
+            msg.yaw = -math.atan2(msg.velocity[0], msg.velocity[1]) + (math.pi/2.0)
 
             self.path.append(msg)
 
