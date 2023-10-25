@@ -65,6 +65,7 @@ class OffboardFigure8Node(Node):
             c2a = math.cos(2.0*a)
             c4a = math.cos(4.0*a)
             c2am3 = c2a-3.0
+            c2am3_cubed = c2am3*c2am3*c2am3
             s = math.sin(a)
             cc = c*c
             ss = s*s
@@ -72,10 +73,10 @@ class OffboardFigure8Node(Node):
             ssmo = (s*s)-1.0
             sspos = sspo*sspo
 
-            msg.position = [(r*c) / sspo, -(r*c*s) / sspo, self.altitude]
-            msg.velocity = [-dadt*r* s*( ss + 2.0*cc + 1.0)/sspos, dadt*r* ( ss*ss + ss + ssmo*cc )/sspos, 0.0]
-            msg.acceleration = [-dadt*dadt*8.0*r*s*c*((3.0*c2a) + 7.0)/(c2am3*c2am3*c2am3), dadt*dadt*r*((44.0*c2a) + c4a -21.0)/(c2am3*c2am3*c2am3), 0.0]
-            msg.yaw = -math.atan2(msg.velocity[0], msg.velocity[1]) + (math.pi/2.0)
+            msg.position = [ -(r*c*s) / sspo, (r*c) / sspo, self.altitude]
+            msg.velocity = [ dadt*r* ( ss*ss + ss + ssmo*cc )/sspos, -dadt*r* s*( ss + 2.0*cc + 1.0)/sspos, 0.0]
+            msg.acceleration = [-dadt*dadt*8.0*r*s*c*((3.0*c2a) + 7.0)/(c2am3_cubed), dadt*dadt*r*c*((44.0*c2a) + c4a -21.0)/(c2am3_cubed), 0.0]
+            msg.yaw = math.atan2(msg.velocity[1], msg.velocity[0])
 
             self.path.append(msg)
 
@@ -160,7 +161,7 @@ class OffboardFigure8Node(Node):
         """Publish the trajectory setpoint."""
         msg = TrajectorySetpoint()
         msg.position = [x, y, z]
-        msg.yaw = (-45.0 + 90.0) * math.pi / 180.0;  # (90 degree)
+        msg.yaw = (45.0) * math.pi / 180.0;
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.trajectory_setpoint_publisher.publish(msg)
 
