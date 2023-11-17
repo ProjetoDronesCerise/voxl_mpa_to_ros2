@@ -1,8 +1,8 @@
 Package: voxl-mpa-to-ros2
-Version: 0.0.1
+Version: 0.0.2
 Section: base
 Priority: optional
 Architecture: arm64
-Depends:libmodal-pipe(>=2.6.0), libmodal-json, voxl-microdds-agent
+Depends:libmodal-pipe(>=2.6.0), libmodal-json, voxl-microdds-agent, voxl-ros2-foxy
 Maintainer: Zach Lowell <zachary.lowell@ascendengineer.com>
 Description: ROS2 Node converting MPA pipes
