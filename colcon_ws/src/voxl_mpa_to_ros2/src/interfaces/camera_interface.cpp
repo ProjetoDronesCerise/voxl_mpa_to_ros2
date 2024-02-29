@@ -97,7 +97,7 @@ static void _frame_cb(
     image_transport::Publisher& publisher = interface->GetPublisher();
     sensor_msgs::msg::Image& img = interface->GetImageMsg();
 
-    img.header.stamp.nanosec = meta.timestamp_ns;
+    img.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), meta.timestamp_ns);
     img.width    = meta.width;
     img.height   = meta.height;
 
