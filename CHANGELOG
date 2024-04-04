@@ -1,3 +1,6 @@
+0.0.3
+    * correct monotonic timestamp to ros time
+    * add YUV422 support
 0.0.2
     * add voxl-ros2-foxy dependency to deb package to fix build chain
 0.0.1
