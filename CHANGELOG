@@ -1,5 +1,6 @@
 0.0.4
     * updated submodules
+    * bashrc updates
 0.0.3
     * correct monotonic timestamp to ros time
     * add YUV422 support
