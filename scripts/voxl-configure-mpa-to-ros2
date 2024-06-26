@@ -26,3 +26,7 @@ source /home/root/.profile.d/source_foxy_setup.sh
 
 echo ""
 echo "done configuring voxl-mpa-to-ros2"
+
+echo 'export ROS_HOME=/opt/ros/foxy' >> ~/.bashrc 
+echo 'source /opt/ros/foxy/local_setup.bash' >> ~/.bashrc 
+echo 'source /opt/ros/foxy/mpa_to_ros2/install/setup.bash' >> ~/.bashrc
