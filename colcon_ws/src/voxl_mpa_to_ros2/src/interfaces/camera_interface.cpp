@@ -128,7 +128,7 @@ static void _frame_cb(
         img.step = meta.width * GetStepSize(IMAGE_FORMAT_YUV422);
         img.encoding = GetRosFormat(IMAGE_FORMAT_YUV422);
 
-        int dataSize = img.step * img.height;
+        int dataSize = img.step * img.height; 
         img.data.resize(dataSize);
 
         char *uv = &(frame[dataSize/2]);
@@ -143,28 +143,27 @@ static void _frame_cb(
             		size_t img_index_1 = (i * meta.width * 2) + (j * 2) + 1;
             		size_t img_index_2 = (i * meta.width * 2) + (j * 2) + 2;
             		size_t img_index_3 = (i * meta.width * 2) + (j * 2) + 3;
-            		size_t uv_index_0 = ((i/2) * (meta.width / 2)) + (j / 2);
-            		size_t uv_index_1 = ((i/2) * (meta.width / 2)) + (j / 2) + 1;
+            		size_t uv_index_0 = ((i/2) * meta.width) + j; // don't subsample chroma here
+            		size_t uv_index_1 = uv_index_0 + 1;
 
             		// Calculate size of img.data and uv
-            		size_t uv_size = ((meta.width * meta.height) / 2); // Assuming UV plane size is half the Y plane
+            		size_t uv_size = meta.width * meta.height; //Combined UV size, UVsize = Width/2 * Height * 2 (2-bytes interleaved UV) in YUV422 NV12
             		size_t img_data_size = img.data.size() + uv_size;
-            		
+
             		// Check if indices are within bounds
             		if (img_index_0 < img_data_size && img_index_1 < img_data_size &&
                 		img_index_2 < img_data_size && img_index_3 < img_data_size &&
                 		uv_index_0 < uv_size && uv_index_1 < uv_size) {
 
                 		// Safely assign values
-                		img.data[img_index_0] = uv[uv_index_0];
-                		img.data[img_index_1] = frame[(i * meta.width) + j];
-                		img.data[img_index_2] = uv[uv_index_1];
-                		img.data[img_index_3] = frame[(i * meta.width) + j + 1];
-
-                		img.data[((i+1) * meta.width * 2) + (j * 2) + 0] = uv[uv_index_0];
-                		img.data[((i+1) * meta.width * 2) + (j * 2) + 1] = frame[((i+1) * meta.width) + j];
-                		img.data[((i+1) * meta.width * 2) + (j * 2) + 2] = uv[uv_index_1];
-                		img.data[((i+1) * meta.width * 2) + (j * 2) + 3] = frame[((i+1) * meta.width) + j + 1];
+                		img.data[img_index_0] = uv[uv_index_0]; 
+                		img.data[img_index_1] = frame[(i * meta.width) + j]; 
+                		img.data[img_index_2] = uv[uv_index_1]; 
+                		img.data[img_index_3] = frame[(i * meta.width) + j + 1]; 
+                		img.data[((i+1) * meta.width * 2) + (j * 2) + 0] = uv[uv_index_0]; 
+                		img.data[((i+1) * meta.width * 2) + (j * 2) + 1] = frame[((i+1) * meta.width) + j]; 
+                		img.data[((i+1) * meta.width * 2) + (j * 2) + 2] = uv[uv_index_1]; 
+                		img.data[((i+1) * meta.width * 2) + (j * 2) + 3] = frame[((i+1) * meta.width) + j + 1]; 
             		} else {
                 		// Log or handle the out-of-bounds access
                 		std::cerr << "Index out of bounds: img_index=" << img_index_0
