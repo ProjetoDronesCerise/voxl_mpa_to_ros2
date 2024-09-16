@@ -50,6 +50,8 @@ CameraInterface::CameraInterface(
 
     m_imageMsg.header.frame_id = name;
     m_imageMsg.is_bigendian    = false;
+    
+    ginterface_name = name;
 
     pipe_client_set_camera_helper_cb(m_channel, _frame_cb, this);
 
@@ -64,22 +66,32 @@ CameraInterface::CameraInterface(
 void CameraInterface::AdvertiseTopics(){
 
     image_transport::ImageTransport it(m_rosNodeHandle);
-
-    m_rosImagePublisher = it.advertise(m_pipeName, 1);
-
+    if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
+      m_rosCompressedPublisher_ = m_rosNodeHandle->create_publisher<sensor_msgs::msg::CompressedImage>(m_pipeName, 1);
+    }
+    else {
+      m_rosImagePublisher = it.advertise(m_pipeName, 1);
+    }
     m_state = ST_AD;
-
 }
 
 void CameraInterface::StopAdvertising(){
-
+  if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
+      m_rosCompressedPublisher_.reset();
+  }
+  else {
     m_rosImagePublisher.shutdown();
-    m_state = ST_CLEAN;
-
+  }
+  m_state = ST_CLEAN;
 }
 
 int CameraInterface::GetNumClients(){
+  if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
+    return m_rosCompressedPublisher_->get_subscription_count();
+  }
+  else {
     return m_rosImagePublisher.getNumSubscribers();
+  }
 }
 
 // helper callback whenever a frame arrives
@@ -94,8 +106,13 @@ static void _frame_cb(
 
     if(interface->GetState() != ST_RUNNING) return;
 
+    interface->frame_format = meta.format;
+
     image_transport::Publisher& publisher = interface->GetPublisher();
     sensor_msgs::msg::Image& img = interface->GetImageMsg();
+
+    rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr& compressed_publisher = interface->GetCompressedPublisher();
+    sensor_msgs::msg::CompressedImage& compressedImage = interface->GetCompressedImageMsg();
 
     img.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), meta.timestamp_ns);
     img.width    = meta.width;
@@ -177,6 +194,56 @@ static void _frame_cb(
         }
        
         publisher.publish(img);
+
+    } else if(meta.format == IMAGE_FORMAT_RAW8) {
+
+        sensor_msgs::msg::Image& img = interface->GetImageMsg();
+        img.header.frame_id = interface->ginterface_name;
+        img.is_bigendian = false;
+        img.width    = meta.width;
+        img.height   = meta.height;
+
+        img.step     = meta.width * GetStepSize(meta.format);
+       	img.encoding = GetRosFormat(meta.format);
+
+        int raw_dataSize = img.step * img.height;
+
+        img.data.resize(raw_dataSize);
+
+        memcpy(&(img.data[0]), frame, raw_dataSize);
+
+        publisher.publish(img);
+
+    } else if (meta.format == IMAGE_FORMAT_H264) {
+        // Fill out the image msg header
+        compressedImage.header.frame_id = interface->ginterface_name;
+        compressedImage.header.stamp.nanosec = meta.timestamp_ns;
+
+        // Fill out image data
+        compressedImage.format = GetRosFormat(IMAGE_FORMAT_H264);
+        int h264_dataSize = meta.size_bytes;
+
+        compressedImage.data.resize(h264_dataSize);
+
+        memcpy(&(compressedImage.data[0]), frame, h264_dataSize);
+
+        compressed_publisher->publish(compressedImage);
+
+
+    } else if (meta.format == IMAGE_FORMAT_H265) {
+        // Fill out the image msg header
+        compressedImage.header.frame_id = interface->ginterface_name;
+        compressedImage.header.stamp.nanosec = meta.timestamp_ns;
+
+        // Fill out image data
+        compressedImage.format = GetRosFormat(IMAGE_FORMAT_H265);
+        int dataSize = meta.size_bytes;
+
+        compressedImage.data.resize(dataSize);
+
+        memcpy(&(compressedImage.data[0]), frame, dataSize);
+
+        compressed_publisher->publish(compressedImage);
 
     } else {
 
