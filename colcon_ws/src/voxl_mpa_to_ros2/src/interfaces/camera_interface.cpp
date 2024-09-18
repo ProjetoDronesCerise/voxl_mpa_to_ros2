@@ -32,6 +32,8 @@
  ******************************************************************************/
 #include <modal_pipe.h>
 #include <string.h>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 #include "voxl_mpa_to_ros2/utils/camera_helpers.h"
 #include "voxl_mpa_to_ros2/interfaces/camera_interface.h"
@@ -61,11 +63,31 @@ CameraInterface::CameraInterface(
         throw -1;
     }
 
+    try {
+        // Construct the file path using the provided name
+        std::string file_path = std::string("/run/mpa/") + name + "/info";
+
+        // Read the JSON file
+        std::ifstream file(file_path);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open the file: " + file_path);
+        }
+
+        // Parse the JSON file
+        nlohmann::json json_data;
+        file >> json_data;
+
+        frame_format = json_data["int_format"];
+    } catch (const std::exception &e) {
+        frame_format = 0;
+    }
+
 }
 
 void CameraInterface::AdvertiseTopics(){
 
     image_transport::ImageTransport it(m_rosNodeHandle);
+
     if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
       m_rosCompressedPublisher_ = m_rosNodeHandle->create_publisher<sensor_msgs::msg::CompressedImage>(m_pipeName, 1);
     }
@@ -105,8 +127,6 @@ static void _frame_cb(
     CameraInterface *interface = (CameraInterface *) context;
 
     if(interface->GetState() != ST_RUNNING) return;
-
-    interface->frame_format = meta.format;
 
     image_transport::Publisher& publisher = interface->GetPublisher();
     sensor_msgs::msg::Image& img = interface->GetImageMsg();

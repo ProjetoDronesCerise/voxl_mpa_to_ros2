@@ -62,6 +62,10 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(voxl_msgs REQUIRED)
+find_package(nlohmann_json REQUIRED
+    CONFIG
+    PATHS "/usr/lib/cmake/"
+)
 
 include_directories(include) 
 
@@ -97,6 +101,7 @@ ament_target_dependencies(${PROJECT_NAME}_node ${dependencies})
 target_link_libraries(${PROJECT_NAME}_node
 	/usr/lib64/libmodal_pipe.so
 	/usr/lib64/libmodal_json.so
+  nlohmann_json
 )
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
