@@ -38,6 +38,7 @@
 #include <image_transport/image_transport.hpp>
 #include <image_transport/publisher.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
 
