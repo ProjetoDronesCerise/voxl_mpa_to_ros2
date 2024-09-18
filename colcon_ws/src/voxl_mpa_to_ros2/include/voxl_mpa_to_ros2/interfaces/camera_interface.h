@@ -35,9 +35,9 @@
 #define CAMERA_MPA_INTERFACE
 
 #include <sensor_msgs/msg/image.hpp>
+#include <image_transport/image_transport.hpp>
+#include <image_transport/publisher.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
-#include <image_transport/image_transport.h>
-#include <image_transport/publisher.h>
 #include <rclcpp/rclcpp.hpp>
 
 #include "voxl_mpa_to_ros2/interfaces/generic_interface.h"
@@ -71,13 +71,25 @@ public:
         return m_rosImagePublisher;
     }
 
+    // Compressed image message for encoded image formats (hires_x_encoded)
+    sensor_msgs::msg::CompressedImage& GetCompressedImageMsg(){
+        return m_compressedImageMsg;
+    }
+
+    rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr& GetCompressedPublisher(){
+        return m_rosCompressedPublisher_;
+    }
+
     const char * ginterface_name;
+    int frame_format;
 
 private:
 
     sensor_msgs::msg::CompressedImage                     m_compressedImage;   ///< Compressed Image message
     sensor_msgs::msg::Image                     m_imageMsg;                   ///< Image message
-    image_transport::Publisher             m_rosImagePublisher;          ///< Image publisher
-    std::string pipeName;
+    sensor_msgs::msg::CompressedImage           m_compressedImageMsg;         ///< Compressed Image message
+    image_transport::Publisher             m_rosImagePublisher;               ///< Image publisher
+    rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr m_rosCompressedPublisher_;       
+
 };
 #endif

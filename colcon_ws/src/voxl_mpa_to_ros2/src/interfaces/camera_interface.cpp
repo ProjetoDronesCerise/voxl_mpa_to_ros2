@@ -32,6 +32,8 @@
  ******************************************************************************/
 #include <modal_pipe.h>
 #include <string.h>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 #include "voxl_mpa_to_ros2/utils/camera_helpers.h"
 #include "voxl_mpa_to_ros2/interfaces/camera_interface.h"
@@ -50,8 +52,10 @@ CameraInterface::CameraInterface(
     // Generic interface name
     ginterface_name = name;
 
-    // Pipe name to determine if encoded
-    pipeName = m_pipeName;
+    m_imageMsg.header.frame_id = name;
+    m_imageMsg.is_bigendian    = false;
+    
+    ginterface_name = name;
 
     pipe_client_set_camera_helper_cb(m_channel, _frame_cb, this);
 
@@ -61,40 +65,52 @@ CameraInterface::CameraInterface(
         throw -1;
     }
 
+    try {
+        // Construct the file path using the provided name
+        std::string file_path = std::string("/run/mpa/") + name + "/info";
+
+        // Read the JSON file
+        std::ifstream file(file_path);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open the file: " + file_path);
+        }
+
+        // Parse the JSON file
+        nlohmann::json json_data;
+        file >> json_data;
+
+        frame_format = json_data["int_format"];
+    } catch (const std::exception &e) {
+        frame_format = 0;
+    }
+
 }
 
 void CameraInterface::AdvertiseTopics(){
 
     image_transport::ImageTransport it(m_rosNodeHandle);
 
-    if (pipeName.find("encoded") != std::string::npos) {
-
+    if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
       m_rosCompressedPublisher_ = m_rosNodeHandle->create_publisher<sensor_msgs::msg::CompressedImage>(m_pipeName, 1);
     }
-
     else {
       m_rosImagePublisher = it.advertise(m_pipeName, 1);
     }
-
     m_state = ST_AD;
-
 }
 
 void CameraInterface::StopAdvertising(){
-
-  if (pipeName.find("encoded") != std::string::npos) {
+  if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
       m_rosCompressedPublisher_.reset();
   }
   else {
     m_rosImagePublisher.shutdown();
   }
-
   m_state = ST_CLEAN;
-
 }
 
 int CameraInterface::GetNumClients(){
-  if (pipeName.find("encoded") != std::string::npos) {
+  if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
     return m_rosCompressedPublisher_->get_subscription_count();
   }
   else {
@@ -116,6 +132,12 @@ static void _frame_cb(
 
     image_transport::Publisher& publisher = interface->GetPublisher();
 
+    rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr& compressed_publisher = interface->GetCompressedPublisher();
+    sensor_msgs::msg::CompressedImage& compressedImage = interface->GetCompressedImageMsg();
+
+    img.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), meta.timestamp_ns);
+    img.width    = meta.width;
+    img.height   = meta.height;
 
     if(meta.format == IMAGE_FORMAT_NV21 || meta.format == IMAGE_FORMAT_NV12){
 
@@ -245,40 +267,35 @@ static void _frame_cb(
         publisher.publish(img);
 
     } else if (meta.format == IMAGE_FORMAT_H264) {
-      sensor_msgs::msg::CompressedImage& h264_img = interface->GetCompressedImageMsg();
-
         // Fill out the image msg header
-        h264_img.header.frame_id = interface->ginterface_name;
-        h264_img.header.stamp.nanosec = meta.timestamp_ns;
+        compressedImage.header.frame_id = interface->ginterface_name;
+        compressedImage.header.stamp.nanosec = meta.timestamp_ns;
 
         // Fill out image data
-        h264_img.format = GetRosFormat(IMAGE_FORMAT_H264);
+        compressedImage.format = GetRosFormat(IMAGE_FORMAT_H264);
         int h264_dataSize = meta.size_bytes;
 
-        h264_img.data.resize(h264_dataSize);
+        compressedImage.data.resize(h264_dataSize);
 
-        memcpy(&(h264_img.data[0]), frame, h264_dataSize);
+        memcpy(&(compressedImage.data[0]), frame, h264_dataSize);
 
-        interface->m_rosCompressedPublisher_->publish(h264_img);
+        compressed_publisher->publish(compressedImage);
 
 
     } else if (meta.format == IMAGE_FORMAT_H265) {
-      sensor_msgs::msg::CompressedImage& h265_img = interface->GetCompressedImageMsg();
-
         // Fill out the image msg header
-        h265_img.header.frame_id = interface->ginterface_name;
-        h265_img.header.stamp.nanosec = meta.timestamp_ns;
+        compressedImage.header.frame_id = interface->ginterface_name;
+        compressedImage.header.stamp.nanosec = meta.timestamp_ns;
 
         // Fill out image data
-        h265_img.format = GetRosFormat(IMAGE_FORMAT_H265);
+        compressedImage.format = GetRosFormat(IMAGE_FORMAT_H265);
         int dataSize = meta.size_bytes;
 
-        h265_img.data.resize(dataSize);
+        compressedImage.data.resize(dataSize);
 
-        memcpy(&(h265_img.data[0]), frame, dataSize);
+        memcpy(&(compressedImage.data[0]), frame, dataSize);
 
-        interface->m_rosCompressedPublisher_->publish(h265_img);
-
+        compressed_publisher->publish(compressedImage);
 
     } else {
 
