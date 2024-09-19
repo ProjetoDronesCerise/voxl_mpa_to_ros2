@@ -100,22 +100,22 @@ void CameraInterface::AdvertiseTopics(){
 }
 
 void CameraInterface::StopAdvertising(){
-  if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
-      m_rosCompressedPublisher_.reset();
-  }
-  else {
-    m_rosImagePublisher.shutdown();
-  }
-  m_state = ST_CLEAN;
+    if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
+        m_rosCompressedPublisher_.reset();
+    }
+    else {
+        m_rosImagePublisher.shutdown();
+    }
+    m_state = ST_CLEAN;
 }
 
 int CameraInterface::GetNumClients(){
-  if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
-    return m_rosCompressedPublisher_->get_subscription_count();
-  }
-  else {
-    return m_rosImagePublisher.getNumSubscribers();
-  }
+    if (frame_format == IMAGE_FORMAT_H265 || frame_format == IMAGE_FORMAT_H264) {
+        return m_rosCompressedPublisher_->get_subscription_count();
+    }
+    else {
+        return m_rosImagePublisher.getNumSubscribers();
+    }
 }
 
 // helper callback whenever a frame arrives
@@ -131,6 +131,7 @@ static void _frame_cb(
     if(interface->GetState() != ST_RUNNING) return;
 
     image_transport::Publisher& publisher = interface->GetPublisher();
+    sensor_msgs::msg::Image& img = interface->GetImageMsg();
 
     rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr& compressed_publisher = interface->GetCompressedPublisher();
     sensor_msgs::msg::CompressedImage& compressedImage = interface->GetCompressedImageMsg();
@@ -141,12 +142,8 @@ static void _frame_cb(
 
     if(meta.format == IMAGE_FORMAT_NV21 || meta.format == IMAGE_FORMAT_NV12){
 
-        sensor_msgs::msg::Image& img = interface->GetImageMsg();
         img.header.frame_id = interface->ginterface_name;
         img.is_bigendian = false;
-        img.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), meta.timestamp_ns);
-        img.width    = meta.width;
-        img.height   = meta.height;
         img.step = meta.width * GetStepSize(IMAGE_FORMAT_YUV422);
         img.encoding = GetRosFormat(IMAGE_FORMAT_YUV422);
 
@@ -220,7 +217,6 @@ static void _frame_cb(
 
     } else if(meta.format == IMAGE_FORMAT_YUV422_UYVY) {
 
-        sensor_msgs::msg::Image& img = interface->GetImageMsg();
         img.header.frame_id = interface->ginterface_name;
         img.is_bigendian = false;
         img.step = meta.width * GetStepSize(IMAGE_FORMAT_YUV422);
@@ -249,11 +245,8 @@ static void _frame_cb(
 
     } else if(meta.format == IMAGE_FORMAT_RAW8) {
 
-        sensor_msgs::msg::Image& img = interface->GetImageMsg();
         img.header.frame_id = interface->ginterface_name;
         img.is_bigendian = false;
-        img.width    = meta.width;
-        img.height   = meta.height;
 
         img.step     = meta.width * GetStepSize(meta.format);
        	img.encoding = GetRosFormat(meta.format);
@@ -299,7 +292,6 @@ static void _frame_cb(
 
     } else {
 
-        sensor_msgs::msg::Image& img = interface->GetImageMsg();
         img.header.frame_id = interface->ginterface_name;
         img.is_bigendian = false;
         img.step     = meta.width * GetStepSize(meta.format);

@@ -53,14 +53,6 @@ public:
     int  GetNumClients();
     void AdvertiseTopics();
     void StopAdvertising();
-
-
-    // Compressed image message for encoded image formats (hires_x_encoded)
-    sensor_msgs::msg::CompressedImage& GetCompressedImageMsg(){
-        return m_compressedImage;
-    }
-
-    rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr m_rosCompressedPublisher_;          ///< Compressed Image publisher
     
     // Raw image formats (hires_x_color, grey)
     sensor_msgs::msg::Image& GetImageMsg(){
