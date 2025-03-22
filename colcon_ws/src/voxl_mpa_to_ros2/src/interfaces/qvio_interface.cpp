@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include <modal_pipe.h>
-#include "voxl_mpa_to_ros2/interfaces/qvio_interface.h"
+#include "voxl_mpa_to_ros2/interfaces/qvio_interface.hpp"
 #include "voxl_mpa_to_ros2/utils/common_utils.h"
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
