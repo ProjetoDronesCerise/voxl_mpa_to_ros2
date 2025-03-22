@@ -53,7 +53,7 @@
  
      if(pipe_client_open(m_channel, name, PIPE_CLIENT_NAME,
                  EN_PIPE_CLIENT_SIMPLE_HELPER | EN_PIPE_CLIENT_AUTO_RECONNECT,
-                 POSE_6DOF_RECOMMENDED_READ_BUF_SIZE)){
+                 TAG_DETECTION_RECOMMENDED_READ_BUF_SIZE)){
          pipe_client_close(m_channel);//Make sure we unclaim the channel
          throw -1;
      }
@@ -62,14 +62,14 @@
  
  void TagInterface::AdvertiseTopics(){
  
-     char topicName[64];
+    char topicName[64];
  
-     sprintf(topicName, "%s", m_pipeName);
+    sprintf(topicName, "%s", m_pipeName);
      pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
          (topicName, rclcpp::SensorDataQoS());
- 
-     odom_pub_ = m_rosNodeHandle->create_publisher<nav_msgs::msg::Odometry>
-         (topicName, rclcpp::SensorDataQoS());
+     //sprintf(topicName, "%s/odom", m_pipeName);
+     //odom_pub_ = m_rosNodeHandle->create_publisher<nav_msgs::msg::Odometry>
+     //    (topicName, rclcpp::SensorDataQoS());
  
      m_state = ST_AD;
  
@@ -78,14 +78,15 @@
  void TagInterface::StopAdvertising(){
  
      pose_pub_.reset();
-     odom_pub_.reset();
+     //odom_pub_.reset();
  
      m_state = ST_CLEAN;
  
  }
  
  int TagInterface::GetNumClients(){
-     return pose_pub_->get_subscription_count() + odom_pub_->get_subscription_count();
+     //return pose_pub_->get_subscription_count() + odom_pub_->get_subscription_count();
+     return pose_pub_->get_subscription_count();
  }
  
  // called when the simple helper has data for us
@@ -98,57 +99,59 @@
      int n_packets;
      // check for 4dof pose packets
  
-     pose_vel_6dof_t* pose_array = pipe_validate_pose_vel_6dof_t(data, bytes, &n_packets);
-     if(pose_array==NULL){
-         printf("ERROR, failed to validate pose_6dof_t packets on fixed pose input sink\n");
-         return;
-     }
+    tag_detection_t* pose_array = pipe_validate_tag_detection_t(data, bytes, &n_packets);
+      if(pose_array==NULL){
+          printf("ERROR, failed to validate apriltag packets\n");
+          return;
+      }
  
      TagInterface *interface = (TagInterface *) context;
      if(interface->GetState() != ST_RUNNING) return;
      
      geometry_msgs::msg::PoseStamped& poseMsg = interface->GetPoseMsg();
-     nav_msgs::msg::Odometry& odomMsg = interface->GetOdomMsg();
+     //nav_msgs::msg::Odometry& odomMsg = interface->GetOdomMsg();
  
      for(int i=0;i<n_packets;i++){
-         pose_vel_6dof_t data = pose_array[i];
+        tag_detection_t data = pose_array[i];
  
-         poseMsg.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), data.timestamp_ns);
-         odomMsg.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), data.timestamp_ns);
+        poseMsg.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), data.timestamp_ns);
+        //odomMsg.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), data.timestamp_ns);
+        poseMsg.header.frame_id = std::to_string(data.id);
+
+        // extract quaternion from {imu w.r.t vio} rotation matrix
+        tf2::Matrix3x3 R(
+             data.R_tag_to_cam[0][0],
+             data.R_tag_to_cam[0][1],
+             data.R_tag_to_cam[0][2],
+             data.R_tag_to_cam[1][0],
+             data.R_tag_to_cam[1][1],
+             data.R_tag_to_cam[1][2],
+             data.R_tag_to_cam[2][0],
+             data.R_tag_to_cam[2][1],
+             data.R_tag_to_cam[2][2]);
+        tf2::Quaternion q;
+        R.getRotation(q);
  
-         // extract quaternion from {imu w.r.t vio} rotation matrix
-         tf2::Matrix3x3 R(
-             data.R_child_to_parent[0][0],
-             data.R_child_to_parent[0][1],
-             data.R_child_to_parent[0][2],
-             data.R_child_to_parent[1][0],
-             data.R_child_to_parent[1][1],
-             data.R_child_to_parent[1][2],
-             data.R_child_to_parent[2][0],
-             data.R_child_to_parent[2][1],
-             data.R_child_to_parent[2][2]);
-         tf2::Quaternion q;
-         R.getRotation(q);
+        poseMsg.pose.position.x = data.T_tag_wrt_cam[0];
+        poseMsg.pose.position.y = data.T_tag_wrt_cam[1];
+        poseMsg.pose.position.z = data.T_tag_wrt_cam[2];
+        poseMsg.pose.orientation.x = q.getX();
+        poseMsg.pose.orientation.y = q.getY();
+        poseMsg.pose.orientation.z = q.getZ();
+        poseMsg.pose.orientation.w = q.getW();
+        interface->pose_pub_->publish(poseMsg);
  
-         poseMsg.pose.position.x = data.T_child_wrt_parent[0];
-         poseMsg.pose.position.y = data.T_child_wrt_parent[1];
-         poseMsg.pose.position.z = data.T_child_wrt_parent[2];
-         poseMsg.pose.orientation.x = q.getX();
-         poseMsg.pose.orientation.y = q.getY();
-         poseMsg.pose.orientation.z = q.getZ();
-         poseMsg.pose.orientation.w = q.getW();
-         interface->pose_pub_->publish(poseMsg);
+         //odomMsg.pose.pose = poseMsg.pose;
+         //odomMsg.twist.twist.linear.x = data.v_child_wrt_parent[0];
+        //  odomMsg.twist.twist.linear.y = data.v_child_wrt_parent[1];
+        //  odomMsg.twist.twist.linear.z = data.v_child_wrt_parent[2];
+        //  odomMsg.twist.twist.angular.x = data.w_child_wrt_child[0];
+        //  odomMsg.twist.twist.angular.y = data.w_child_wrt_child[1];
+        //  odomMsg.twist.twist.angular.z = data.w_child_wrt_child[2];
  
-         odomMsg.pose.pose = poseMsg.pose;
-         odomMsg.twist.twist.linear.x = data.v_child_wrt_parent[0];
-         odomMsg.twist.twist.linear.y = data.v_child_wrt_parent[1];
-         odomMsg.twist.twist.linear.z = data.v_child_wrt_parent[2];
-         odomMsg.twist.twist.angular.x = data.w_child_wrt_child[0];
-         odomMsg.twist.twist.angular.y = data.w_child_wrt_child[1];
-         odomMsg.twist.twist.angular.z = data.w_child_wrt_child[2];
- 
-         interface->odom_pub_->publish(odomMsg);
+        //  interface->odom_pub_->publish(odomMsg);
      }
+
      return;
  }
  

@@ -63,11 +63,11 @@ QVIOInterface::QVIOInterface(
 void QVIOInterface::AdvertiseTopics(){
 
     char topicName[64];
-
+ 
     sprintf(topicName, "%s", m_pipeName);
     pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
         (topicName, rclcpp::SensorDataQoS());
-
+    //sprintf(topicName, "%s/odom", m_pipeName);
     odom_pub_ = m_rosNodeHandle->create_publisher<nav_msgs::msg::Odometry>
         (topicName, rclcpp::SensorDataQoS());
 

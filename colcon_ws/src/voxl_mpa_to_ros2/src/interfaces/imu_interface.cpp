@@ -99,7 +99,7 @@ static void _helper_cb(__attribute__((unused))int ch, char* data, int bytes, voi
     imu_data_t* data_array = pipe_validate_imu_data_t(data, bytes, &n_packets);
     if(data_array == NULL) return;
 
-    print("got data!!");
+    //std::cout << "got data!!" << std::endl;
     IMUInterface *interface = (IMUInterface *) context;
     if(interface->GetState() != ST_RUNNING) return;
     sensor_msgs::msg::Imu& imu = interface->GetImuMsg();
