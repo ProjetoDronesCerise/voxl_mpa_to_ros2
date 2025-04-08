@@ -58,9 +58,6 @@ public:
     geometry_msgs::msg::PoseStamped& GetPoseMsg(){
         return m_poseMsg;
     }
-    nav_msgs::msg::Odometry& GetOdomMsg(){
-        return m_odomMsg;
-    }
 
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
 
