@@ -67,10 +67,7 @@
     sprintf(topicName, "%s", m_pipeName);
      pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
          (topicName, rclcpp::SensorDataQoS());
-     //sprintf(topicName, "%s/odom", m_pipeName);
-     //odom_pub_ = m_rosNodeHandle->create_publisher<nav_msgs::msg::Odometry>
-     //    (topicName, rclcpp::SensorDataQoS());
- 
+
      m_state = ST_AD;
  
  }
@@ -85,7 +82,6 @@
  }
  
  int TagInterface::GetNumClients(){
-     //return pose_pub_->get_subscription_count() + odom_pub_->get_subscription_count();
      return pose_pub_->get_subscription_count();
  }
  
@@ -97,7 +93,6 @@
          return;
      }
      int n_packets;
-     // check for 4dof pose packets
  
     tag_detection_t* pose_array = pipe_validate_tag_detection_t(data, bytes, &n_packets);
       if(pose_array==NULL){
@@ -109,13 +104,11 @@
      if(interface->GetState() != ST_RUNNING) return;
      
      geometry_msgs::msg::PoseStamped& poseMsg = interface->GetPoseMsg();
-     //nav_msgs::msg::Odometry& odomMsg = interface->GetOdomMsg();
  
      for(int i=0;i<n_packets;i++){
         tag_detection_t data = pose_array[i];
  
         poseMsg.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), data.timestamp_ns);
-        //odomMsg.header.stamp = _clock_monotonic_to_ros_time(interface->getNodeHandle(), data.timestamp_ns);
         poseMsg.header.frame_id = std::to_string(data.id);
 
         // extract quaternion from {imu w.r.t vio} rotation matrix
@@ -140,16 +133,7 @@
         poseMsg.pose.orientation.z = q.getZ();
         poseMsg.pose.orientation.w = q.getW();
         interface->pose_pub_->publish(poseMsg);
- 
-         //odomMsg.pose.pose = poseMsg.pose;
-         //odomMsg.twist.twist.linear.x = data.v_child_wrt_parent[0];
-        //  odomMsg.twist.twist.linear.y = data.v_child_wrt_parent[1];
-        //  odomMsg.twist.twist.linear.z = data.v_child_wrt_parent[2];
-        //  odomMsg.twist.twist.angular.x = data.w_child_wrt_child[0];
-        //  odomMsg.twist.twist.angular.y = data.w_child_wrt_child[1];
-        //  odomMsg.twist.twist.angular.z = data.w_child_wrt_child[2];
- 
-        //  interface->odom_pub_->publish(odomMsg);
+
      }
 
      return;

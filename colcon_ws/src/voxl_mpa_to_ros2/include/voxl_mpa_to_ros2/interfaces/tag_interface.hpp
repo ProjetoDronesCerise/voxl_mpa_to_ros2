@@ -63,12 +63,10 @@ public:
     }
 
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
 
 private:
 
     geometry_msgs::msg::PoseStamped           m_poseMsg;                    ///< Image message
-    nav_msgs::msg::Odometry                   m_odomMsg;                    ///< Image message
 
 };
 #endif
