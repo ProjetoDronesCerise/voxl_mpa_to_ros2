@@ -6,6 +6,8 @@ include:
     file: '/pipeline-configs/qrb5165-emulator.yml'
   - project: 'voxl-public/voxl-sdk/ci-tools'
     file: '/pipeline-configs/common.yml'
+  - project: 'voxl-public/voxl-sdk/ci-tools'
+    file: '/pipeline-configs/defect_dojo.yml'
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
