@@ -62,13 +62,13 @@ PoseVel6DOFInterface::PoseVel6DOFInterface(
 
 void PoseVel6DOFInterface::AdvertiseTopics(){
 
-    char topicName[64];
+    char topicName[256];
  
-    sprintf(topicName, "%s/pose", m_pipeName);
+    snprintf(topicName, sizeof(topicName), "%s/pose", m_pipeName);
     pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
         (topicName, rclcpp::SensorDataQoS());
         
-    sprintf(topicName, "%s/odom", m_pipeName);
+    snprintf(topicName, sizeof(topicName), "%s/odom", m_pipeName);
     odom_pub_ = m_rosNodeHandle->create_publisher<nav_msgs::msg::Odometry>
         (topicName, rclcpp::SensorDataQoS());
 

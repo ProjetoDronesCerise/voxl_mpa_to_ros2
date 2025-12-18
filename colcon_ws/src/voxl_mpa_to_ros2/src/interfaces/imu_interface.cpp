@@ -68,9 +68,9 @@ IMUInterface::IMUInterface(
 
 void IMUInterface::AdvertiseTopics(){
 
-    char topicName[64];
+    char topicName[256];
 
-    sprintf(topicName, "%s", m_pipeName);
+    snprintf(topicName, sizeof(topicName), "%s", m_pipeName);
     imu_pub_ = m_rosNodeHandle->create_publisher<sensor_msgs::msg::Imu>
         (topicName, rclcpp::SensorDataQoS());
 

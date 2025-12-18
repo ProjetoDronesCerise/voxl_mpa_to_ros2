@@ -72,8 +72,8 @@ AiDetectionInterface::AiDetectionInterface(
 
 void AiDetectionInterface::AdvertiseTopics(){
 
-    char topicName[64];
-    sprintf(topicName, "%s", m_pipeName);
+    char topicName[256];
+    snprintf(topicName, sizeof(topicName), "%s", m_pipeName);
 
     ai_detection_pub_ = m_rosNodeHandle->create_publisher<voxl_msgs::msg::Aidetection>
         (topicName, rclcpp::SensorDataQoS());

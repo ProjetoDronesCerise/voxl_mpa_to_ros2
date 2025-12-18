@@ -62,13 +62,13 @@
  
  void TagInterface::AdvertiseTopics(){
  
-    char topicName[64];
+    char topicName[256];
  
-    sprintf(topicName, "%s", m_pipeName);
-     pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
-         (topicName, rclcpp::SensorDataQoS());
+    snprintf(topicName, sizeof(topicName), "%s", m_pipeName);
+    pose_pub_ = m_rosNodeHandle->create_publisher<geometry_msgs::msg::PoseStamped>
+        (topicName, rclcpp::SensorDataQoS());
 
-     m_state = ST_AD;
+    m_state = ST_AD;
  
  }
  

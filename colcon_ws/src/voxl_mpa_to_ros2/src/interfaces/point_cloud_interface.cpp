@@ -68,8 +68,8 @@ PointCloudInterface::PointCloudInterface(
 
 void PointCloudInterface::AdvertiseTopics(){
 
-    char topicName[64];
-    sprintf(topicName, "%s", m_pipeName);
+    char topicName[256];
+    snprintf(topicName, sizeof(topicName), "%s", m_pipeName);
 
     m_pcPublisher = m_rosNodeHandle->create_publisher<sensor_msgs::msg::PointCloud2>
         (topicName, rclcpp::SensorDataQoS());

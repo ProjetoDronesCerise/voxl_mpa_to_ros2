@@ -108,7 +108,9 @@ static bool listContainsPipe(InterfaceListNode *head, char *name){
 static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 
 	InterfaceListNode *tail;
-    for(tail = head; tail->next != NULL; tail = tail->next);
+    for(tail = head; tail->next != NULL; tail = tail->next) {
+  		// empty on purpose 
+  		}
 
 	FILE *fp = popen("voxl-list-pipes --mode-types", "r");
 	if (!fp) {
