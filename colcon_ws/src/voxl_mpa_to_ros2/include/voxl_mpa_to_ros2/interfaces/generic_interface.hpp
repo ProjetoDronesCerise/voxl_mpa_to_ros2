@@ -164,6 +164,7 @@ public:
 protected:
 
     static void _interface_dc_cb(int ch, void* context){
+        (void)ch;
 
         GenericInterface *interface = (GenericInterface *)context;
 

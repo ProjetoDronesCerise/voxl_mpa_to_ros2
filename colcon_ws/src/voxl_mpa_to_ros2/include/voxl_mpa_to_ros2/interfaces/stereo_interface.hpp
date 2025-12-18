@@ -35,8 +35,8 @@
 #define STEREO_MPA_INTERFACE
 
 #include <sensor_msgs/msg/image.hpp>
-#include <image_transport/image_transport.h>
-#include <image_transport/publisher.h>
+#include <image_transport/image_transport.hpp>
+#include <image_transport/publisher.hpp>
 
 #include "voxl_mpa_to_ros2/interfaces/generic_interface.hpp"
 

@@ -62,12 +62,14 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(voxl_msgs REQUIRED)
+
+# nlohmann_json (keep original behavior)
 find_package(nlohmann_json REQUIRED
-    CONFIG
-    PATHS "/usr/lib/cmake/"
+  CONFIG
+  PATHS "/usr/lib/cmake/"
 )
 
-include_directories(include) 
+include_directories(include)
 
 set(dependencies
   rclcpp
@@ -84,25 +86,52 @@ set(dependencies
   tf2_ros
 )
 
-add_executable(${PROJECT_NAME}_node
-    src/interfaces/imu_interface.cpp
-    src/interfaces/pose_vel_6dof_interface.cpp
-    src/interfaces/camera_interface.cpp
-    src/interfaces/point_cloud_interface.cpp
-    src/interfaces/stereo_interface.cpp
-    src/interfaces/qvio_interface.cpp
-    src/interfaces/ai_detection_interface.cpp
-    src/utils/common_utils.cpp
-    src/utils/camera_helpers.cpp
-    src/interface_manager.cpp
-    src/mpa_ros_node.cpp
-    src/interfaces/tag_interface.cpp
+# --- ModalAI libs: don't hardcode /usr/lib64 ---
+find_library(MODAL_PIPE_LIB
+  NAMES modal_pipe
+  PATHS /usr/lib64 /usr/lib /usr/lib/aarch64-linux-gnu
+  REQUIRED
 )
+
+find_library(MODAL_JSON_LIB
+  NAMES modal_json
+  PATHS /usr/lib64 /usr/lib /usr/lib/aarch64-linux-gnu
+  REQUIRED
+)
+
+message(STATUS "Found modal_pipe: ${MODAL_PIPE_LIB}")
+message(STATUS "Found modal_json: ${MODAL_JSON_LIB}")
+
+add_executable(${PROJECT_NAME}_node
+  src/interfaces/imu_interface.cpp
+  src/interfaces/pose_vel_6dof_interface.cpp
+  src/interfaces/camera_interface.cpp
+  src/interfaces/point_cloud_interface.cpp
+  src/interfaces/stereo_interface.cpp
+  src/interfaces/qvio_interface.cpp
+  src/interfaces/ai_detection_interface.cpp
+  src/utils/common_utils.cpp
+  src/utils/camera_helpers.cpp
+  src/interface_manager.cpp
+  src/mpa_ros_node.cpp
+  src/interfaces/tag_interface.cpp
+)
+
 ament_target_dependencies(${PROJECT_NAME}_node ${dependencies})
+
 target_link_libraries(${PROJECT_NAME}_node
-	/usr/lib64/libmodal_pipe.so
-	/usr/lib64/libmodal_json.so
+  ${MODAL_PIPE_LIB}
+  ${MODAL_JSON_LIB}
   nlohmann_json
+)
+
+# Help runtime loader find ModalAI libs without needing LD_LIBRARY_PATH
+get_filename_component(MODAL_PIPE_DIR "${MODAL_PIPE_LIB}" DIRECTORY)
+get_filename_component(MODAL_JSON_DIR "${MODAL_JSON_LIB}" DIRECTORY)
+
+set_target_properties(${PROJECT_NAME}_node PROPERTIES
+  BUILD_RPATH "${MODAL_PIPE_DIR};${MODAL_JSON_DIR}"
+  INSTALL_RPATH "${MODAL_PIPE_DIR};${MODAL_JSON_DIR}"
 )
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
@@ -110,4 +139,3 @@ install(TARGETS ${PROJECT_NAME}_node DESTINATION lib/${PROJECT_NAME})
 
 ament_export_dependencies(${dependencies})
 ament_package()
-
