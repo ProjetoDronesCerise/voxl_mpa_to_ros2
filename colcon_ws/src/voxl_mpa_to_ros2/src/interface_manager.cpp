@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include "voxl_mpa_to_ros2/interfaces/all_interfaces.hpp"
 #include "voxl_mpa_to_ros2/interface_manager.hpp"
+#include "voxl_mpa_to_ros2/interfaces/stereo_interface.hpp"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -201,7 +202,12 @@ static int findPipes(InterfaceListNode *head, rclcpp::Node::SharedPtr nh){
 						break;
 					
 					case INT_CAMERA:
-						newNode->interface = new CameraInterface(nh, newNode->name);
+						// tratamento do pipe de camera stereo diferente das cameras comuns
+						if (!strcmp(newNode->name, "stereo_front") || !strcmp(newNode->name, "stereo_rear")) {
+							newNode->interface = new StereoInterface(nh, newNode->name);
+						} else {
+							newNode->interface = new CameraInterface(nh, newNode->name);
+						}
 						break;
 						
 					case INT_PC:
