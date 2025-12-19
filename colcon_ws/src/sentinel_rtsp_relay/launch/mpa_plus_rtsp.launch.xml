@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<!--
+/****************************************************************************
+ * Sentinel – MPA + RTSP Relay Launch
+ *
+ * 1) Sobe o voxl_mpa_to_ros_node2
+ * 2) Sobe o relay RTSP (tracking=9001, stereo=9002+)
+ ****************************************************************************/
+-->
+
+<launch>
+
+    <!-- ========================= -->
+    <!-- VOXL MPA → ROS2 Node      -->
+    <!-- ========================= -->
+    <node
+        pkg="voxl_mpa_to_ros2"
+        exec="voxl_mpa_to_ros_node2"
+        name="voxl_mpa_to_ros_node2"
+        output="screen"
+    />
+
+    <!-- ========================= -->
+    <!-- RTSP Relay Node           -->
+    <!-- ========================= -->
+    <node
+        pkg="sentinel_rtsp_relay"
+        exec="rtsp_relay_node"
+        name="sentinel_rtsp_relay"
+        output="screen"
+    />
+
+</launch>
