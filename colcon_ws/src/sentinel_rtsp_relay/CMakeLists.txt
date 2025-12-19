@@ -24,16 +24,19 @@ target_link_libraries(rtsp_relay_node
   ${GSTRTSP_LIBRARIES}
 )
 
+ament_target_dependencies(rtsp_relay_node
+  rclcpp
+  sensor_msgs
+)
 
+# Se seu ambiente trata warnings como erro, isso evita travar por deprecations de headers do GLib/GStreamer
 target_compile_options(rtsp_relay_node PRIVATE -Wno-error=deprecated-declarations)
 
-ament_target_dependencies(rtsp_relay_node rclcpp sensor_msgs)
-
 install(TARGETS rtsp_relay_node
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
-install(
-  DIRECTORY launch
+install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 

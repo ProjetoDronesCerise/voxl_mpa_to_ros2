@@ -2,20 +2,24 @@
 
 <launch>
 
-    <!-- VOXL MPA → ROS2 -->
-    <node
-        pkg="voxl_mpa_to_ros2"
-        exec="voxl_mpa_to_ros2_node"
-        name="voxl_mpa_to_ros2_node"
-        output="screen"
-    />
+  <!-- VOXL MPA -> ROS2 -->
+  <node
+    pkg="voxl_mpa_to_ros2"
+    exec="voxl_mpa_to_ros2_node"
+    name="voxl_mpa_to_ros2_node"
+    output="screen"
+  />
 
-    <!-- RTSP relay -->
-    <node
-        pkg="sentinel_rtsp_relay"
-        exec="rtsp_relay_node"
-        name="sentinel_rtsp_relay"
-        output="screen"
-    />
+  <!-- RTSP relay -->
+  <node
+    pkg="sentinel_rtsp_relay"
+    exec="rtsp_relay_node"
+    name="sentinel_rtsp_relay"
+    output="screen">
+
+    <!-- evita o warning do OpenGL/TLS no container -->
+    <env name="GST_GL_DISABLE" value="1"/>
+
+  </node>
 
 </launch>
